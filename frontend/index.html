@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ConectorLatam — Plataforma SaaS de Integración Fiscal Latinoamérica</title>
+  <meta name="description" content="ConectorLatam: Plataforma B2B SaaS ETL/ELT para automatización de flujos de datos fiscales latinoamericanos hacia BigQuery, Snowflake y Redshift." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════ SIDEBAR ════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+          <path d="M6 16C6 10.477 10.477 6 16 6" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M26 16C26 21.523 21.523 26 16 26" stroke="url(#g2)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="16" cy="16" r="4" fill="url(#g3)"/>
+          <path d="M16 6V2M16 30v-4M6 16H2M30 16h-4" stroke="url(#g1)" stroke-width="2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="32" y1="0" x2="0" y2="32" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#06b6d4"/><stop offset="1" stop-color="#6366f1"/>
+            </linearGradient>
+            <radialGradient id="g3" cx="50%" cy="50%" r="50%">
+              <stop stop-color="#a855f7"/><stop offset="1" stop-color="#6366f1"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">ConectorLatam</span>
+        <span class="brand-tag">Fiscal ETL · SaaS B2B</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <a href="#" class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-wizard" onclick="showView('wizard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <span>Nuevo Pipeline</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-logs" onclick="showView('logs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="11" x2="14" y2="11"/>
+        </svg>
+        <span>Consola de Logs</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:12px">Comercial</div>
+      <a href="#" class="nav-item" id="nav-pricing" onclick="showView('pricing')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span>Planes y Precios</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:12px">Desarrollo</div>
+      <a href="#" class="nav-item" id="nav-apidocs" onclick="showView('apidocs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/>
+        </svg>
+        <span>API Docs</span>
+      </a>
+      <div class="nav-section-label" style="margin-top:12px">Seguridad</div>
+      <a href="#" class="nav-item" id="nav-audit" onclick="showView('audit')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Auditoría</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <!-- HU21: Organization Selector -->
+      <div class="org-selector" id="org-selector">
+        <select class="form-select-sm" id="org-select" onchange="switchOrganization(this.value)" style="width:100%; margin-bottom:6px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-dim); border-radius:var(--radius-sm); padding:5px 8px; font-size:.65rem; font-family:inherit;">
+          <option value="org-001">Corporación Demo LATAM S.A.</option>
+          <option value="org-002">Grupo Industrial Norte S.A. de C.V.</option>
+          <option value="org-003">Importaciones del Pacífico S.R.L.</option>
+        </select>
+      </div>
+      <div class="plan-chip">
+        <span class="plan-chip-dot"></span>
+        <span>Plan Growth · 14 días trial</span>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar">CM</div>
+        <div class="user-info">
+          <span class="user-name">Carlos Mendoza</span>
+          <span class="user-role">Lead Data Engineer</span>
+        </div>
+        <div class="status-dot"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════ MAIN CONTENT ═══════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="mobile-brand">
+        <div class="mobile-brand-left">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+            <path d="M6 16C6 10.477 10.477 6 16 6" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M26 16C26 21.523 21.523 26 16 26" stroke="url(#g2)" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="16" cy="16" r="4" fill="url(#g3)"/>
+            <path d="M16 6V2M16 30v-4M6 16H2M30 16h-4" stroke="url(#g1)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="mobile-brand-text">
+            <span class="brand-name">ConectorLatam</span>
+          </div>
+        </div>
+        <div class="user-avatar-mobile" onclick="openSettings()">CM</div>
+      </div>
+      <div class="header-left">
+        <h1 class="page-title" id="page-title">Dashboard de Monitoreo</h1>
+        <div class="breadcrumb">
+          <span>ConectorLatam</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M9 18l6-6-6-6"/></svg>
+          <span id="breadcrumb-current">Dashboard</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-ghost btn-icon" onclick="openSettings()" title="Configuración de Cuenta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-icon" onclick="startTutorial()" title="Tutorial Guiado">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+        <div class="header-divider"></div>
+        <div class="header-time" id="header-time"></div>
+        <div class="live-badge"><span class="live-dot"></span><span>LIVE</span></div>
+        <button class="btn btn-primary btn-sm" onclick="triggerManualRun()" id="run-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Ejecutar Pipeline
+        </button>
+      </div>
+    </header>
+
+    <!-- ══════════════════════ VIEW: DASHBOARD ═════════════════════════════════ -->
+    <section class="view" id="view-dashboard">
+
+      <!-- KPI Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Ciclo de Facturación Actual</span>
+            <span class="kpi-value" id="val-cycle">—</span>
+            <span class="kpi-sub">XMLs fiscales procesados</span>
+          </div>
+          <div class="kpi-trend kpi-trend--up">↑ +12.4%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--cyan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Procesados Hoy</span>
+            <span class="kpi-value" id="val-today">—</span>
+            <span class="kpi-sub">registros sincronizados</span>
+          </div>
+          <div class="kpi-trend kpi-trend--up">↑ +8.1%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Tasa de Éxito</span>
+            <span class="kpi-value" id="val-success">—</span>
+            <span class="kpi-sub">últimos 30 días</span>
+          </div>
+          <div class="kpi-trend kpi-trend--up">↑ +0.3%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-icon--amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Duplicados Prevenidos</span>
+            <span class="kpi-value" id="val-dups">—</span>
+            <span class="kpi-sub">integridad garantizada (RF18)</span>
+          </div>
+          <div class="kpi-trend kpi-trend--neutral">→ RF18 activo</div>
+        </div>
+      </div>
+
+      <!-- Active Connectors -->
+      <div class="section-header">
+        <h2 class="section-title">Conectores Activos</h2>
+        <button class="btn btn-ghost btn-sm" onclick="showView('wizard')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar Conector
+        </button>
+      </div>
+      <div class="connectors-grid" id="connectors-grid"></div>
+
+      <!-- Execution History RF20 -->
+      <div class="section-header" style="margin-top:2rem">
+        <h2 class="section-title">Historial de Ejecuciones <span class="badge badge--info">RF20</span></h2>
+        <button class="btn btn-ghost btn-sm" onclick="showView('logs')">Ver consola →</button>
+      </div>
+      <div class="activity-table-wrapper">
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Timestamp (ISO 8601)</th>
+              <th>País Origen</th>
+              <th>Tipo Documento</th>
+              <th>Registros Procesados</th>
+              <th>Destino de Datos</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="activity-tbody"></tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════ VIEW: WIZARD ════════════════════════════════════ -->
+    <section class="view hidden" id="view-wizard">
+      <div class="wizard-container">
+
+        <!-- Progress -->
+        <div class="wizard-progress">
+          <div class="wizard-step active" id="step-indicator-1">
+            <div class="step-circle">1</div>
+            <span class="step-label">Origen Fiscal</span>
+          </div>
+          <div class="step-connector" id="step-conn-1"></div>
+          <div class="wizard-step" id="step-indicator-2">
+            <div class="step-circle">2</div>
+            <span class="step-label">Credenciales</span>
+          </div>
+          <div class="step-connector" id="step-conn-2"></div>
+          <div class="wizard-step" id="step-indicator-3">
+            <div class="step-circle">3</div>
+            <span class="step-label">Destino</span>
+          </div>
+        </div>
+
+        <!-- STEP 1: Origen Fiscal -->
+        <div class="wizard-card" id="wizard-step-1">
+          <div class="wizard-card-header">
+            <h2>Selecciona el Ente Regulador Fiscal</h2>
+            <p>Elige la entidad tributaria de la que extraerás los comprobantes electrónicos autorizados. Todos los conectores utilizan los endpoints oficiales de cada país.</p>
+          </div>
+          <div class="source-grid">
+            <button class="source-card active" id="source-btn-sri" onclick="selectSource('SRI Ecuador', this)">
+              <div class="source-flag">🇪🇨</div>
+              <div class="source-info">
+                <span class="source-name">Ecuador · SRI</span>
+                <span class="source-desc">Servicio de Rentas Internas</span>
+                <span class="source-id-label">Identificador: RUC (13 dígitos)</span>
+              </div>
+              <div class="source-badge">Certificado</div>
+              <div class="source-check">✓</div>
+            </button>
+            <button class="source-card" id="source-btn-sat" onclick="selectSource('SAT México', this)">
+              <div class="source-flag">🇲🇽</div>
+              <div class="source-info">
+                <span class="source-name">México · SAT</span>
+                <span class="source-desc">Servicio de Administración Tributaria</span>
+                <span class="source-id-label">Identificador: RFC (13 dígitos)</span>
+              </div>
+              <div class="source-badge">Certificado</div>
+              <div class="source-check">✓</div>
+            </button>
+            <button class="source-card" id="source-btn-sunat" onclick="selectSource('SUNAT Perú', this)">
+              <div class="source-flag">🇵🇪</div>
+              <div class="source-info">
+                <span class="source-name">Perú · SUNAT</span>
+                <span class="source-desc">Superintendencia Nacional de Aduanas</span>
+                <span class="source-id-label">Identificador: RUC (11 dígitos)</span>
+              </div>
+              <div class="source-badge">Certificado</div>
+              <div class="source-check">✓</div>
+            </button>
+            <button class="source-card" id="source-btn-dian" onclick="selectSource('DIAN Colombia', this)">
+              <div class="source-flag">🇨🇴</div>
+              <div class="source-info">
+                <span class="source-name">Colombia · DIAN</span>
+                <span class="source-desc">Dirección de Impuestos y Aduanas</span>
+                <span class="source-id-label">Identificador: NIT (9 dígitos)</span>
+              </div>
+              <div class="source-badge">Certificado</div>
+              <div class="source-check">✓</div>
+            </button>
+          </div>
+          <div class="wizard-nav">
+            <span></span>
+            <button class="btn btn-primary" onclick="goToStep(2)">
+              Siguiente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Credenciales (RF10) -->
+        <div class="wizard-card hidden" id="wizard-step-2">
+          <div class="wizard-card-header">
+            <h2 id="step2-title">Credenciales de Acceso Seguro</h2>
+            <p>Las credenciales se almacenan con cifrado <strong>AES-256</strong> y nunca se transmiten en texto plano. <span class="badge badge--info">RNF03</span></p>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="input-taxid">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span id="taxid-label">RUC (Registro Único de Contribuyentes)</span>
+              </label>
+              <input type="text" id="input-taxid" class="form-input" placeholder="1792XXXXXXXXX001" />
+              <span class="form-hint" id="taxid-hint">13 dígitos — persona natural o jurídica</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Contraseña de Acceso
+              </label>
+              <div class="input-wrapper">
+                <input type="password" id="input-password" class="form-input" placeholder="••••••••••••" />
+                <button class="input-toggle" onclick="togglePassword()" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <span class="form-hint">Clave del portal tributario oficial</span>
+            </div>
+
+            <!-- Drag & Drop Certificate Upload -->
+            <div class="form-group form-group--full">
+              <label class="form-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Certificado Digital de Firma Electrónica (.p12 / .pfx)
+                <span class="badge badge--info" style="margin-left:6px">RF10</span>
+              </label>
+              <div class="file-upload-zone"
+                   id="file-zone"
+                   onclick="document.getElementById('cert-file').click()"
+                   ondragover="handleDragOver(event)"
+                   ondragleave="handleDragLeave(event)"
+                   ondrop="handleDrop(event)">
+                <input type="file" id="cert-file" accept=".p12,.pfx,.cer" style="display:none" onchange="handleFileUpload(this)" />
+                <div class="file-upload-content" id="file-upload-content">
+                  <div class="file-upload-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </div>
+                  <p class="file-upload-text">Arrastra tu certificado aquí o <span>haz clic para explorar</span></p>
+                  <p class="file-upload-hint">Formatos: .p12 · .pfx · .cer — Máx. 5 MB · Cifrado AES-256 al almacenar</p>
+                </div>
+              </div>
+            </div>
+            <div class="form-group form-group--full">
+              <label class="form-label" for="input-cert-pass">Contraseña del Certificado (.p12)</label>
+              <div class="input-wrapper">
+                <input type="password" id="input-cert-pass" class="form-input" placeholder="Contraseña del archivo de firma electrónica" />
+              </div>
+            </div>
+
+            <!-- AES Preview -->
+            <div class="form-group form-group--full" id="aes-preview-group" style="display:none">
+              <div class="aes-preview">
+                <div class="aes-preview-header">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Simulación de Cifrado AES-256 (RNF03)
+                </div>
+                <code id="aes-preview-val"></code>
+              </div>
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button class="btn btn-ghost" onclick="goToStep(1)">← Atrás</button>
+            <button class="btn btn-primary" onclick="goToStep(3)">
+              Siguiente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Destino (RF05, RF06, RF07) -->
+        <div class="wizard-card hidden" id="wizard-step-3">
+          <div class="wizard-card-header">
+            <h2>Destino del Data Warehouse</h2>
+            <p>Selecciona dónde se cargarán los datos fiscales procesados. Cada destino es mutuamente excluyente por pipeline. <span class="badge badge--info">RF05 · RF06 · RF07</span></p>
+          </div>
+          <div class="dest-grid">
+            <button class="dest-card active" id="dest-bigquery" onclick="selectDest('Google BigQuery', this)">
+              <div class="dest-logo dest-logo--bq">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="dest-info">
+                <span class="dest-name">Google BigQuery</span>
+                <span class="dest-desc">Data warehouse serverless · SQL analítico a escala petabyte</span>
+                <div class="dest-tags"><span class="tag">RF05</span><span class="tag">Serverless</span><span class="tag">Petabyte</span><span class="tag">ML integrado</span></div>
+              </div>
+              <div class="dest-check">✓</div>
+            </button>
+            <button class="dest-card" id="dest-snowflake" onclick="selectDest('Snowflake', this)">
+              <div class="dest-logo dest-logo--sf">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
+                  <path d="M12 3v18M3 12h18M5.636 5.636l12.728 12.728M18.364 5.636L5.636 18.364" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="dest-info">
+                <span class="dest-name">Snowflake</span>
+                <span class="dest-desc">Cloud data platform multi-cloud · separación compute/storage</span>
+                <div class="dest-tags"><span class="tag">RF06</span><span class="tag">Multi-cloud</span><span class="tag">Elastic</span><span class="tag">Zero-copy</span></div>
+              </div>
+              <div class="dest-check">✓</div>
+            </button>
+            <button class="dest-card" id="dest-redshift" onclick="selectDest('Amazon Redshift', this)">
+              <div class="dest-logo dest-logo--rs">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="#FF9900" stroke-width="1.5"/>
+                  <path d="M8 12l4-6 4 6-4 2-4-2z" fill="#FF9900" opacity=".8"/>
+                  <path d="M8 12l4 2 4-2v3l-4 2-4-2v-3z" fill="#FF9900"/>
+                </svg>
+              </div>
+              <div class="dest-info">
+                <span class="dest-name">Amazon Redshift</span>
+                <span class="dest-desc">Data warehouse columnar · integración nativa con el ecosistema AWS</span>
+                <div class="dest-tags"><span class="tag">RF07</span><span class="tag">Columnar</span><span class="tag">AWS</span><span class="tag">S3 Spectrum</span></div>
+              </div>
+              <div class="dest-check">✓</div>
+            </button>
+          </div>
+
+          <!-- Config Summary -->
+          <div class="config-preview">
+            <div class="config-preview-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Resumen del Pipeline · Cifrado AES-256 activo (RNF03)
+            </div>
+            <div class="config-preview-body">
+              <div class="config-row"><span class="config-key">Origen fiscal:</span><span class="config-val" id="preview-origin">SRI Ecuador</span></div>
+              <div class="config-row"><span class="config-key">Identificador:</span><span class="config-val" id="preview-taxid">—</span></div>
+              <div class="config-row"><span class="config-key">Certificado:</span><span class="config-val" id="preview-cert">certificado.p12 (simulado)</span></div>
+              <div class="config-row"><span class="config-key">Cifrado cred.:</span><span class="config-val" id="preview-aes" style="color:var(--accent-green)">AES-256 · En espera</span></div>
+              <div class="config-row"><span class="config-key">Destino:</span><span class="config-val" id="preview-dest">Google BigQuery</span></div>
+              <div class="config-row"><span class="config-key">Modo extracción:</span><span class="config-val">Incremental · Watermark-based (RF09)</span></div>
+              <div class="config-row"><span class="config-key">Deduplicación:</span><span class="config-val">Activa por clave compuesta (RF18)</span></div>
+            </div>
+          </div>
+
+          <!-- HU12: Programación de Extracciones (RF08) -->
+          <div class="config-preview" style="margin-top:14px;">
+            <div class="config-preview-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Programación Automática (RF08) — Opcional
+            </div>
+            <div class="config-preview-body" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+              <select class="form-select-sm" id="schedule-frequency" style="flex:1; min-width:120px;">
+                <option value="">Sin programar</option>
+                <option value="daily">Diario (06:00 UTC)</option>
+                <option value="weekly">Semanal (Lunes 06:00)</option>
+                <option value="monthly">Mensual (Día 1, 06:00)</option>
+                <option value="custom">Cron personalizado</option>
+              </select>
+              <input type="text" class="form-input" id="schedule-cron" placeholder="0 6 * * *" style="flex:1; min-width:120px; display:none; font-size:.75rem; padding:6px 10px;">
+            </div>
+          </div>
+
+          <div class="wizard-nav">
+            <button class="btn btn-ghost" onclick="goToStep(2)">← Atrás</button>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-ghost" onclick="showDataPreview()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Vista Previa
+              </button>
+              <button class="btn btn-primary btn-lg" id="save-btn" onclick="saveConnector()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Guardar y Ejecutar Pipeline
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Success Modal ── -->
+      <div class="modal-backdrop hidden" id="success-modal">
+        <div class="modal-card">
+          <div class="modal-icon-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h2 class="modal-title">Pipeline Activado y Operativo</h2>
+          <p class="modal-subtitle" id="modal-subtitle">Extracción incremental configurada correctamente.</p>
+
+          <div class="modal-meta-grid" id="modal-meta"></div>
+
+          <div class="modal-terminal" id="modal-terminal"></div>
+
+          <div class="modal-actions">
+            <button class="btn btn-primary" onclick="closeModal(); showView('dashboard')">Ver Dashboard</button>
+            <button class="btn btn-ghost" onclick="closeModal(); showView('logs')">Ver Consola de Logs</button>
+            <button class="btn btn-ghost" onclick="closeModal(); showView('wizard')">Nuevo Pipeline</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════ VIEW: LOGS ══════════════════════════════════════ -->
+    <section class="view hidden" id="view-logs">
+      <div class="logs-layout">
+
+        <!-- History Table -->
+        <div class="logs-panel">
+          <div class="panel-header" style="flex-direction:column; align-items:stretch; gap:10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <h2>Historial de Ejecuciones <span class="badge badge--info">RF17 · RF20 · RF22</span></h2>
+              <div class="panel-actions">
+                <button class="btn btn-ghost btn-sm" onclick="loadLogs()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  Actualizar
+                </button>
+              </div>
+            </div>
+            <!-- HU05 / HU18: Filtros avanzados -->
+            <div class="logs-filters" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+              <select class="form-select-sm" id="filter-connector" onchange="filterLogs()">
+                <option value="">Todos los conectores</option>
+                <option value="SRI Ecuador">SRI Ecuador</option>
+                <option value="SAT México">SAT México</option>
+                <option value="SUNAT Perú">SUNAT Perú</option>
+                <option value="DIAN Colombia">DIAN Colombia</option>
+              </select>
+              <select class="form-select-sm" id="filter-doctype" onchange="filterLogs()">
+                <option value="">Tipo Documento</option>
+                <option value="Factura Electrónica">Factura Electrónica</option>
+                <option value="Nota de Crédito">Nota de Crédito</option>
+                <option value="Nota de Débito">Nota de Débito</option>
+                <option value="Retención Electrónica">Retención Electrónica</option>
+                <option value="CFDI 4.0">CFDI 4.0</option>
+                <option value="Liquidación de Compra">Liquidación de Compra</option>
+              </select>
+              <select class="form-select-sm" id="filter-status" onchange="filterLogs()">
+                <option value="">Estado</option>
+                <option value="SUCCESS">✓ Éxito</option>
+                <option value="WARNING">⚠ Advertencia</option>
+                <option value="ERROR">✗ Error</option>
+              </select>
+              <input type="date" class="form-select-sm" id="filter-date-from" onchange="filterLogs()" title="Fecha desde" style="font-family:inherit;">
+              <input type="date" class="form-select-sm" id="filter-date-to" onchange="filterLogs()" title="Fecha hasta" style="font-family:inherit;">
+              <!-- HU15: Descarga CSV/JSON -->
+              <button class="btn btn-ghost btn-xs" onclick="downloadLogs('csv')" title="Descargar CSV">📥 CSV</button>
+              <button class="btn btn-ghost btn-xs" onclick="downloadLogs('json')" title="Descargar JSON">📥 JSON</button>
+            </div>
+          </div>
+          <div class="logs-table-wrapper">
+            <table class="logs-table">
+              <thead>
+                <tr>
+                  <th>Timestamp (ISO 8601)</th>
+                  <th>País Origen</th>
+                  <th>Tipo Documento</th>
+                  <th>Registros</th>
+                  <th>Destino</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="logs-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Terminal Console -->
+        <div class="terminal-panel">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot dot--red"></span>
+              <span class="dot dot--yellow"></span>
+              <span class="dot dot--green"></span>
+            </div>
+            <span class="terminal-title">conectorlatam-etl-engine · audit-log · ISO 8601</span>
+            <button class="btn btn-ghost btn-xs" onclick="clearTerminal()">Limpiar</button>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <div class="terminal-welcome"></div>
+          </div>
+          <div class="terminal-footer">
+            <div class="terminal-status" id="terminal-status">
+              <span class="term-dot active"></span> Engine en espera — selecciona una ejecución
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="triggerManualRun()">▶ Run</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════ VIEW: PRICING ═══════════════════════════════════ -->
+    <section class="view hidden" id="view-pricing">
+
+      <div class="pricing-hero">
+        <div class="pricing-hero-badge">Planes de Suscripción · Modelo de Negocio B2B SaaS</div>
+        <h2 class="pricing-hero-title">Automatiza tu Integración Fiscal <br>desde <span class="gradient-text">$149 / mes</span></h2>
+        <p class="pricing-hero-sub">Conectores certificados · Cifrado AES-256 · SLA 99.9% · Sin código</p>
+        <button class="btn btn-trial btn-lg" onclick="startTrial('growth')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Iniciar Prueba Gratuita de 14 Días — Sin tarjeta de crédito
+        </button>
+      </div>
+
+      <div class="pricing-grid">
+
+        <!-- Starter -->
+        <div class="pricing-card" id="plan-starter">
+          <div class="pricing-card-header">
+            <div class="plan-icon plan-icon--starter">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div>
+              <h3 class="plan-name">Starter</h3>
+              <p class="plan-desc">Para empezar en el mercado fiscal</p>
+            </div>
+          </div>
+          <div class="plan-price">
+            <span class="price-amount">$149</span>
+            <span class="price-period">/ mes</span>
+          </div>
+          <div class="plan-margin-note">Margen estimado: ~65% · CAC recovery: 3-4 meses</div>
+          <ul class="plan-features">
+            <li class="feature-item feature-item--yes"><span>✓</span> <strong>1 país fiscal</strong> a elección (SRI / SAT / SUNAT / DIAN)</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> <strong>1 destino</strong> de datos (BigQuery, Snowflake o Redshift)</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Conectores certificados con endpoints oficiales</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Cifrado AES-256 de credenciales (RNF03)</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Extracción incremental cada 15 min</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Consola de logs con auditoría ISO 8601</li>
+            <li class="feature-item feature-item--no"><span>✗</span> Multi-país</li>
+            <li class="feature-item feature-item--no"><span>✗</span> Soporte prioritario 24/7</li>
+          </ul>
+          <button class="btn btn-plan btn-plan--starter" onclick="startTrial('starter')">
+            Prueba 14 días gratis →
+          </button>
+        </div>
+
+        <!-- Growth (Popular) -->
+        <div class="pricing-card pricing-card--popular" id="plan-growth">
+          <div class="popular-badge">⭐ MÁS POPULAR</div>
+          <div class="pricing-card-header">
+            <div class="plan-icon plan-icon--growth">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div>
+              <h3 class="plan-name">Growth</h3>
+              <p class="plan-desc">El preferido por los equipos de datos</p>
+            </div>
+          </div>
+          <div class="plan-price">
+            <span class="price-amount">$299</span>
+            <span class="price-period">/ mes</span>
+          </div>
+          <div class="plan-margin-note">Margen estimado: ~72% · CAC recovery: 2-3 meses</div>
+          <ul class="plan-features">
+            <li class="feature-item feature-item--yes"><span>✓</span> <strong>2 países fiscales</strong> a elección</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> <strong>2 destinos</strong> de datos simultáneos</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Conectores certificados con endpoints oficiales</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Cifrado AES-256 de credenciales (RNF03)</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Extracción incremental cada 5 min</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Dashboard de monitoreo avanzado (RF09)</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Historial de ejecuciones 90 días (RF20)</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Soporte técnico business hours</li>
+          </ul>
+          <button class="btn btn-plan btn-plan--growth" onclick="startTrial('growth')">
+            Prueba 14 días gratis →
+          </button>
+        </div>
+
+        <!-- Multi-LATAM -->
+        <div class="pricing-card" id="plan-multilatam">
+          <div class="pricing-card-header">
+            <div class="plan-icon plan-icon--multi">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div>
+              <h3 class="plan-name">Multi-LATAM</h3>
+              <p class="plan-desc">Cobertura regional completa</p>
+            </div>
+          </div>
+          <div class="plan-price">
+            <span class="price-amount">$499</span>
+            <span class="price-period">/ mes</span>
+          </div>
+          <div class="plan-margin-note">Margen estimado: ~78% · Ideal para ERPs y auditoras</div>
+          <ul class="plan-features">
+            <li class="feature-item feature-item--yes"><span>✓</span> <strong>4 países fiscales</strong>: SRI · SAT · SUNAT · DIAN</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> <strong>3 destinos</strong>: BigQuery + Snowflake + Redshift</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Conectores certificados con endpoints oficiales</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Cifrado AES-256 + rotación automática de keys</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Extracción en tiempo real (near-real-time)</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> SLA garantizado: 99.9% uptime</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Historial ilimitado + alertas Slack/Email</li>
+            <li class="feature-item feature-item--yes"><span>✓</span> Soporte prioritario 24/7 + Customer Success</li>
+          </ul>
+          <button class="btn btn-plan btn-plan--multi" onclick="startTrial('multilatam')">
+            Prueba 14 días gratis →
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="trust-row">
+        <div class="trust-item"><span class="trust-icon">🔒</span><span>AES-256 Encryption</span></div>
+        <div class="trust-item"><span class="trust-icon">🌎</span><span>4 Países LATAM</span></div>
+        <div class="trust-item"><span class="trust-icon">⚡</span><span>Sin código requerido</span></div>
+        <div class="trust-item"><span class="trust-icon">📊</span><span>Auditoría ISO 8601</span></div>
+        <div class="trust-item"><span class="trust-icon">🔄</span><span>Deduplicación automática</span></div>
+        <div class="trust-item"><span class="trust-icon">🛡️</span><span>SLA 99.9%</span></div>
+      </div>
+
+      <!-- Trial CTA Banner -->
+      <div class="trial-banner">
+        <div class="trial-banner-content">
+          <h3>¿Listo para automatizar tu integración fiscal?</h3>
+          <p>Conecta tu primer pipeline en menos de 5 minutos. Sin tarjeta de crédito. Sin contratos.</p>
+        </div>
+        <button class="btn btn-trial" onclick="startTrial('growth')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Activar Prueba Gratuita de 14 Días
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════ VIEW: API DOCS (HU14 / RF23) ═══════════════════ -->
+    <section class="view hidden" id="view-apidocs">
+      <div class="section-header">
+        <h2 class="section-title">Documentación API REST <span class="badge badge--info">RF23</span></h2>
+        <span class="badge badge--success">OpenAPI 3.0.3</span>
+      </div>
+      <div class="api-docs-intro" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; margin-bottom:20px;">
+        <h3 style="color:var(--text-primary); font-size:.95rem; margin-bottom:8px;">ConectorLatam API v2.0.0</h3>
+        <p style="color:var(--text-secondary); font-size:.8rem; margin-bottom:12px;">API REST para integración fiscal latinoamericana. Usa tu API Key para autenticarte. Las respuestas son en formato JSON con códigos HTTP estándar.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+          <span class="badge badge--success">Base URL: /api</span>
+          <span class="badge badge--info">Auth: API Key Header</span>
+          <span class="badge badge--warning">Rate Limit: 100 req/min</span>
+        </div>
+        <div style="background:var(--bg-base); border:1px solid var(--border-dim); border-radius:var(--radius-md); padding:10px; font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--accent-cyan);">
+          curl -H "Authorization: Bearer pk_live_51MabcxYz123" https://api.conectorlatam.com/api/metrics
+        </div>
+      </div>
+      <div class="api-endpoints-list" id="api-endpoints-list">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ══════════════════════ VIEW: AUDIT (HU23 / RF13 / RF17) ═══════════════ -->
+    <section class="view hidden" id="view-audit">
+      <div class="section-header">
+        <h2 class="section-title">Log de Auditoría Inmutable <span class="badge badge--info">RF13 · RF17</span></h2>
+        <div style="display:flex; gap:8px;">
+          <span class="badge badge--success">🔒 Inmutable</span>
+          <button class="btn btn-ghost btn-sm" onclick="downloadAuditCSV()">📥 Exportar CSV</button>
+        </div>
+      </div>
+      <p style="color:var(--text-secondary); font-size:.78rem; margin-bottom:16px;">Registro cronológico de todas las operaciones. No es editable ni eliminable. Cada entrada incluye usuario, timestamp UTC, acción, parámetros y resultado.</p>
+      <div class="activity-table-wrapper">
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Timestamp UTC</th>
+              <th>Usuario</th>
+              <th>Acción</th>
+              <th>Objetivo</th>
+              <th>Parámetros</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Trial Success Modal -->
+  <div class="modal-backdrop hidden" id="trial-modal">
+    <div class="modal-card" style="max-width:420px; text-align:center">
+      <div class="modal-icon-success">🚀</div>
+      <h2 class="modal-title">¡Prueba Gratuita Activada!</h2>
+      <p class="modal-subtitle" id="trial-modal-msg">Tu período de prueba de 14 días ha comenzado.</p>
+      <div class="modal-meta-grid" id="trial-modal-meta"></div>
+      <div class="modal-actions" style="justify-content:center">
+        <button class="btn btn-primary" onclick="document.getElementById('trial-modal').classList.add('hidden'); showView('wizard')">
+          Configurar mi primer Pipeline →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-backdrop hidden" id="settings-modal">
+    <div class="modal-card" style="max-width:650px;">
+      <div class="modal-card-header">
+        <h2 class="modal-title">Configuración de Cuenta</h2>
+        <p class="modal-subtitle">Gestión de perfil, suscripción, alertas, usuarios y consumo</p>
+      </div>
+      
+      <div class="settings-tabs">
+        <div class="settings-tab active" onclick="switchSettingsTab('profile')">Perfil</div>
+        <div class="settings-tab" onclick="switchSettingsTab('subscription')">Suscripción</div>
+        <div class="settings-tab" onclick="switchSettingsTab('apikeys')">API Keys</div>
+        <div class="settings-tab" onclick="switchSettingsTab('alerts')">Alertas</div>
+        <div class="settings-tab" onclick="switchSettingsTab('users')">Usuarios</div>
+        <div class="settings-tab" onclick="switchSettingsTab('usage')">Consumo</div>
+      </div>
+
+      <!-- Tab: Perfil -->
+      <div class="settings-content" id="set-profile">
+        <div class="input-group">
+          <label class="input-label">Nombre de Organización</label>
+          <input type="text" class="input-field" value="Corporación Demo LATAM S.A." readonly>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Administrador Principal</label>
+          <input type="text" class="input-field" value="Carlos Mendoza (Lead Data Engineer)" readonly>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Email Corporativo</label>
+          <input type="text" class="input-field" value="carlos.mendoza@demo-latam.com" readonly>
+        </div>
+      </div>
+
+      <!-- Tab: Suscripción -->
+      <div class="settings-content hidden" id="set-subscription">
+        <div class="plan-status-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+            <div>
+              <span class="plan-status-title">Plan Actual</span>
+              <div class="plan-status-name" id="settings-plan-name">Starter</div>
+            </div>
+            <span class="badge badge--success" id="settings-plan-status">Activo</span>
+          </div>
+          <div class="plan-limits">
+            <div class="limit-item">
+              <span class="limit-label">Países Fiscales Permitidos</span>
+              <span class="limit-value" id="settings-plan-countries">1</span>
+            </div>
+            <div class="limit-item">
+              <span class="limit-label">Destinos de Datos</span>
+              <span class="limit-value" id="settings-plan-dests">1</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="closeSettings(); showView('pricing')">Hacer Upgrade de Plan</button>
+      </div>
+
+      <!-- Tab: API Keys -->
+      <div class="settings-content hidden" id="set-apikeys">
+        <p style="color:var(--text-secondary); font-size: 0.85rem; margin-bottom: 16px;">Usa estas credenciales para interactuar programáticamente con la API de ConectorLatam.</p>
+        <div class="input-group">
+          <label class="input-label">Public Key</label>
+          <input type="text" class="input-field" value="pk_live_51MabcxYz123" readonly>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Secret Key (Solo lectura)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="password" class="input-field" value="sk_live_verysecretkey" id="settings-secret-key" readonly>
+            <button class="btn btn-ghost" onclick="toggleSettingsPassword()">👁️</button>
+          </div>
+        </div>
+        <button class="btn btn-outline" style="width:100%; margin-top: 8px;" onclick="rotateApiKeys()">Rotar API Keys</button>
+      </div>
+
+      <!-- Tab: Alertas (HU17 / RF13) -->
+      <div class="settings-content hidden" id="set-alerts">
+        <p style="color:var(--text-secondary); font-size:.8rem; margin-bottom:14px;">Configura los canales de notificación para recibir alertas cuando un pipeline falle, se demore o detecte un cambio en la API fiscal. <span class="badge badge--info">RF13</span></p>
+        <div class="input-group">
+          <label class="input-label">Email de notificación</label>
+          <input type="email" class="input-field" id="alert-email" placeholder="alerts@tu-empresa.com" value="carlos.mendoza@demo-latam.com">
+        </div>
+        <div class="input-group">
+          <label class="input-label">URL de Webhook (Slack, Teams, etc.)</label>
+          <input type="url" class="input-field" id="alert-webhook" placeholder="https://hooks.slack.com/services/...">
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:.8rem; color:var(--text-secondary); cursor:pointer;">
+            <input type="checkbox" id="alert-on-failure" checked style="accent-color:var(--accent);"> Alertar en fallo de extracción
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:.8rem; color:var(--text-secondary); cursor:pointer;">
+            <input type="checkbox" id="alert-on-timeout" checked style="accent-color:var(--accent);"> Alertar en timeout / demora excesiva
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:.8rem; color:var(--text-secondary); cursor:pointer;">
+            <input type="checkbox" id="alert-on-apichange" style="accent-color:var(--accent);"> Alertar en cambio detectado en API fiscal
+          </label>
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="saveAlerts()">Guardar Configuración de Alertas</button>
+      </div>
+
+      <!-- Tab: Usuarios y Roles (HU22 / RF16) -->
+      <div class="settings-content hidden" id="set-users">
+        <p style="color:var(--text-secondary); font-size:.8rem; margin-bottom:14px;">Asigna roles diferenciados (Administrador, Operador, Visor) a los usuarios de tu organización. Los permisos se aplican en tiempo real. <span class="badge badge--info">RF16</span></p>
+        <div class="activity-table-wrapper" style="max-height:280px; overflow-y:auto;">
+          <table class="logs-table" style="font-size:.75rem;">
+            <thead>
+              <tr><th>Usuario</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acción</th></tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Consumo (HU25 / RF28) -->
+      <div class="settings-content hidden" id="set-usage">
+        <p style="color:var(--text-secondary); font-size:.8rem; margin-bottom:14px;">Consulta tu consumo actual del plan. Una alerta visual aparece al superar el 80% del límite. <span class="badge badge--info">RF28</span></p>
+        <div id="usage-panel">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeSettings()">Cerrar Panel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HU10: Preview Modal (RF19) -->
+  <div class="modal-backdrop hidden" id="preview-modal">
+    <div class="modal-card" style="max-width:850px;">
+      <div class="modal-card-header">
+        <h2 class="modal-title">Vista Previa de Datos <span class="badge badge--info">RF19</span></h2>
+        <p class="modal-subtitle" id="preview-subtitle">Máx. 100 registros con esquema del destino</p>
+      </div>
+      <div style="margin-bottom:12px;">
+        <h4 style="font-size:.78rem; color:var(--text-secondary); margin-bottom:6px;">Esquema del destino:</h4>
+        <div id="preview-schema" style="display:flex; flex-wrap:wrap; gap:5px;"></div>
+      </div>
+      <div class="activity-table-wrapper" style="max-height:350px; overflow-y:auto;">
+        <table class="logs-table" style="font-size:.7rem;">
+          <thead id="preview-thead"></thead>
+          <tbody id="preview-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn btn-primary" onclick="confirmPreviewLoad()">✓ Confirmar Carga al DWH</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('preview-modal').classList.add('hidden')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HU19: Error Detail Modal (RF22 / RF26) -->
+  <div class="modal-backdrop hidden" id="error-detail-modal">
+    <div class="modal-card" style="max-width:700px;">
+      <div class="modal-card-header">
+        <h2 class="modal-title">Errores a Nivel de Registro <span class="badge badge--info">RF22 · RF26</span></h2>
+        <p class="modal-subtitle" id="error-detail-subtitle">Detalle de registros fallidos</p>
+      </div>
+      <div class="activity-table-wrapper" style="max-height:320px; overflow-y:auto;">
+        <table class="logs-table" style="font-size:.75rem;">
+          <thead>
+            <tr><th>#</th><th>Comprobante ID</th><th>Campo con Error</th><th>Causa</th><th>Severidad</th></tr>
+          </thead>
+          <tbody id="error-detail-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="downloadErrorCSV()">📥 Exportar Errores CSV</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('error-detail-modal').classList.add('hidden')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutorial Popover -->
+  <div class="tutorial-overlay hidden" id="tutorial-overlay"></div>
+  <div class="tutorial-popover hidden" id="tutorial-popover">
+    <div class="tutorial-header">
+      <span class="tutorial-step-badge" id="tut-step">Paso 1 de 3</span>
+      <button class="btn-icon" onclick="endTutorial()" style="color:var(--text-tertiary); background:transparent; border:none; cursor:pointer">✕</button>
+    </div>
+    <h3 class="tutorial-title" id="tut-title">Bienvenido a ConectorLatam</h3>
+    <div class="tutorial-text" id="tut-text">Esta guía rápida te mostrará cómo automatizar tus flujos fiscales en 3 simples pasos. ¡No requieres conocimientos de programación!</div>
+    <div class="tutorial-actions">
+      <button class="btn btn-ghost btn-sm" onclick="endTutorial()">Saltar</button>
+      <button class="btn btn-primary btn-sm" id="tut-next-btn" onclick="nextTutorialStep()">Comenzar →</button>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
