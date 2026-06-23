@@ -28,18 +28,55 @@ const COUNTRY_META = {
 
 // ─── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Portal selector shown on load — portals start hidden
   updateClock();
   setInterval(updateClock, 1000);
-  loadMetrics();
-  setInterval(loadMetrics, 20000);
-  showView('dashboard');
-  
-  // Mostrar tutorial a usuarios nuevos
-  if (!localStorage.getItem('tutorialSeen')) {
-    localStorage.setItem('tutorialSeen', 'true');
-    setTimeout(startTutorial, 800);
-  }
+  setInterval(() => {
+    if (document.getElementById('portal-client') && !document.getElementById('portal-client').classList.contains('hidden')) {
+      loadMetrics();
+    }
+  }, 20000);
 });
+
+// ─── Portal Navigation ─────────────────────────────────────────────────────────
+function enterPortal(type) {
+  document.getElementById('portal-selector').style.display = 'none';
+  if (type === 'client') {
+    document.getElementById('portal-client').classList.remove('hidden');
+    document.getElementById('portal-admin').classList.add('hidden');
+    showClientView('dashboard');
+    loadMetrics();
+    if (!localStorage.getItem('clientTutorialSeen')) {
+      localStorage.setItem('clientTutorialSeen', 'true');
+      setTimeout(startClientTutorial, 800);
+    } else {
+      // Pulse the help button to remind user of the tutorial
+      const helpBtn = document.querySelector('.tut-help-btn:not(.tut-help-btn--admin)');
+      if (helpBtn) { helpBtn.classList.add('tut-help-btn--pulse'); setTimeout(() => helpBtn.classList.remove('tut-help-btn--pulse'), 8000); }
+    }
+  } else {
+    document.getElementById('portal-admin').classList.remove('hidden');
+    document.getElementById('portal-client').classList.add('hidden');
+    showAdminView('apis');
+    loadApiHealth();
+    loadAdminAlerts();
+    if (!localStorage.getItem('adminTutorialSeen')) {
+      localStorage.setItem('adminTutorialSeen', 'true');
+      setTimeout(startAdminTutorial, 900);
+    } else {
+      const helpBtn = document.querySelector('.tut-help-btn--admin');
+      if (helpBtn) { helpBtn.classList.add('tut-help-btn--pulse'); setTimeout(() => helpBtn.classList.remove('tut-help-btn--pulse'), 8000); }
+    }
+  }
+}
+
+
+function goToPortalSelector() {
+  document.getElementById('portal-selector').style.display = 'flex';
+  document.getElementById('portal-client').classList.add('hidden');
+  document.getElementById('portal-admin').classList.add('hidden');
+}
+
 
 // ─── Clock ─────────────────────────────────────────────────────────────────────
 function updateClock() {
@@ -48,30 +85,65 @@ function updateClock() {
 }
 
 // ─── Navigation ────────────────────────────────────────────────────────────────
-function showView(view) {
-  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+function showClientView(view) {
+  document.querySelectorAll('#portal-client .view').forEach(v => v.classList.add('hidden'));
+  document.querySelectorAll('#sidebar-client .nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(`view-${view}`)?.classList.remove('hidden');
   document.getElementById(`nav-${view}`)?.classList.add('active');
 
   const meta = {
-    dashboard: ['Dashboard de Monitoreo', 'Dashboard'],
-    wizard:    ['Asistente de Configuración de Pipelines', 'Nuevo Pipeline'],
-    logs:      ['Consola Técnica de Logs · RF17 · RF22', 'Logs & Historial'],
+    dashboard: ['Mis Conexiones Fiscales', 'Mis Conexiones'],
+    wizard:    ['Nueva Conexión Fiscal', 'Nueva Conexión'],
+    logs:      ['Historial y Logs de Ejecuciones', 'Historial y Logs'],
     pricing:   ['Planes de Suscripción SaaS B2B', 'Planes y Precios'],
     apidocs:   ['Documentación API REST · RF23', 'API Docs'],
-    audit:     ['Log de Auditoría Inmutable · RF13 · RF17', 'Auditoría'],
   };
   const [title, crumb] = meta[view] || [view, view];
-  document.getElementById('page-title').textContent = title;
-  document.getElementById('breadcrumb-current').textContent = crumb;
+  const pt = document.getElementById('client-page-title');
+  const bc = document.getElementById('client-breadcrumb');
+  if (pt) pt.textContent = title;
+  if (bc) bc.textContent = crumb;
 
   S.view = view;
   if (view === 'dashboard') loadMetrics();
   if (view === 'logs')      { loadLogs(); setTimeout(initTerminal, 350); }
   if (view === 'wizard')    { resetWizard(); updateWizardLocks(); }
   if (view === 'apidocs')   loadApiDocs();
-  if (view === 'audit')     loadAuditLog();
+}
+
+// Alias for legacy calls within existing code
+function showView(view) { showClientView(view); }
+
+function showAdminView(view) {
+  document.querySelectorAll('#portal-admin .view').forEach(v => v.classList.add('hidden'));
+  document.querySelectorAll('#sidebar-admin .nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`aview-${view}`)?.classList.remove('hidden');
+  document.getElementById(`anav-${view}`)?.classList.add('active');
+
+  const meta = {
+    apis:     ['Estado de APIs Fiscales Gubernamentales', 'APIs Fiscales'],
+    alerts:   ['Alertas del Sistema', 'Alertas'],
+    metrics:  ['Métricas Globales de la Plataforma', 'Métricas Globales'],
+    clients:  ['Organizaciones Cliente', 'Clientes'],
+    users:    ['Usuarios del Sistema', 'Usuarios'],
+    billing:  ['Facturación y Cobros', 'Facturación'],
+    plans:    ['Configuración de Planes', 'Config. Planes'],
+    audit:    ['Log de Auditoría Inmutable · RF13', 'Auditoría'],
+  };
+  const [title, crumb] = meta[view] || [view, view];
+  const pt = document.getElementById('admin-page-title');
+  const bc = document.getElementById('admin-breadcrumb');
+  if (pt) pt.textContent = title;
+  if (bc) bc.textContent = crumb;
+
+  if (view === 'apis')    loadApiHealth();
+  if (view === 'alerts')  loadAdminAlerts();
+  if (view === 'metrics') loadAdminMetrics();
+  if (view === 'clients') loadAdminClients();
+  if (view === 'users')   loadAdminUsers();
+  if (view === 'billing') loadAdminBilling();
+  if (view === 'plans')   loadAdminPlans();
+  if (view === 'audit')   loadAdminAudit();
 }
 
 // ─── API helpers ───────────────────────────────────────────────────────────────
@@ -86,11 +158,27 @@ async function loadMetrics() {
   let data;
   try { data = await apiFetch(`${API}/metrics`); }
   catch { data = DEMO_METRICS(); }
+
+  if (data.active_connectors !== undefined && !data.connectors) {
+    try {
+      const connData = await apiFetch(`${API}/connectors`);
+      data.connectors = connData.data || connData;
+    } catch (e) {
+      console.error('Failed to load active connectors', e);
+    }
+  }
+
+  if (data.connectors) {
+    data.connectors.forEach(c => {
+      if (!c.tax_id) c.tax_id = '1792123456001';
+    });
+  }
+
   S.connectors = data.connectors || [];
   renderKPIs(data);
   renderConnectors(data.connectors || []);
   if (S.view === 'dashboard') {
-    if (!S.allLogs.length) S.allLogs = DEMO_LOGS();
+    if (!S.allLogs || !S.allLogs.length) S.allLogs = DEMO_LOGS();
     renderActivityTable(S.allLogs);
   }
 }
@@ -120,7 +208,9 @@ function renderConnectors(list) {
   if (!grid) return;
   if (!list.length) { grid.innerHTML = '<p style="color:var(--text-tertiary);font-size:.8rem;">Sin conectores activos.</p>'; return; }
   grid.innerHTML = list.map(c => {
-    const meta = COUNTRY_META[c.origin] || { flag: '🌎' };
+    const originLower = c.origin ? c.origin.toLowerCase() : '';
+    const metaKey = Object.keys(COUNTRY_META).find(k => k.toLowerCase() === originLower || k.toLowerCase().includes(originLower) || originLower.includes(k.toLowerCase())) || '';
+    const meta = COUNTRY_META[metaKey] || { flag: '🌎' };
     return `
     <div class="connector-card">
       <div class="connector-card-header">
@@ -146,7 +236,7 @@ function renderConnectors(list) {
 function renderActivityTable(logs) {
   const tb = document.getElementById('activity-tbody');
   if (!tb) return;
-  tb.innerHTML = logs.slice(0, 8).map(l => `
+  tb.innerHTML = (logs || []).filter(l => l).slice(0, 8).map(l => `
     <tr onclick="showView('logs')" title="Ver en consola de logs">
       <td style="font-family:'JetBrains Mono',monospace;font-size:.7rem;white-space:nowrap;color:var(--text-tertiary)">${l.timestamp}</td>
       <td style="font-weight:700;color:var(--text-primary)">${(COUNTRY_META[l.origin]?.flag||'🌎')+' '+l.origin}</td>
@@ -570,158 +660,238 @@ function closeModal() {
 
 
 
-// ─── Tutorial Flow ─────────────────────────────────────────────────────────────
+// ─── Tutorial Engine ────────────────────────────────────────────────────────────
 let tutStep = 0;
-const tutSteps = [
-  { 
-    view: 'dashboard', 
-    target: '.sidebar-brand', 
-    title: '👋 ¡Bienvenido a ConectorLatam!', 
-    text: 'Esta plataforma es un <strong>ETL Fiscal</strong>. Su objetivo es conectarse automáticamente a los portales de impuestos de diferentes países (como el SRI de Ecuador) para extraer tus facturas y cargarlas directamente en tu base de datos empresarial. ¡Sin programar nada!' 
+let tutStepsActive = [];
+let tutMode = 'client'; // 'client' | 'admin'
+
+/* ── Pasos del Portal Cliente (7 pasos) ─────────────────────────────────────── */
+const CLIENT_TUT_STEPS = [
+  {
+    view: 'dashboard', target: '.sidebar-brand', icon: '👋',
+    title: '¡Bienvenido a ConectorLatam!',
+    text: 'Esta plataforma es un <strong>ETL Fiscal</strong>: se conecta automáticamente a los portales de impuestos de LATAM (SRI, SAT, SUNAT, DIAN) y carga tus facturas en tu Data Warehouse. <strong>Sin programar nada.</strong>',
   },
-  { 
-    view: 'dashboard', 
-    target: '#run-btn', 
-    title: '▶️ Botón "Ejecutar Pipeline"', 
-    text: 'Este botón en la cabecera sirve para <strong>iniciar manualmente una sincronización</strong>. Al presionarlo, el sistema se conectará de inmediato con el portal del gobierno y descargará los comprobantes fiscales más recientes.' 
+  {
+    view: 'dashboard', target: '.kpi-grid', icon: '📊',
+    title: 'Métricas en Tiempo Real',
+    text: '• <strong>Ciclo de Facturación:</strong> XMLs extraídos en el mes.<br>• <strong>Procesados Hoy:</strong> Registros del día.<br>• <strong>Tasa de Éxito:</strong> % de pipelines exitosos.<br>• <strong>Duplicados Prevenidos:</strong> Motor de deduplicación RF18.',
   },
-  { 
-    view: 'dashboard', 
-    target: '.kpi-grid', 
-    title: '📊 Métricas en Tiempo Real', 
-    text: 'Aquí verás:<br>• <strong>Ciclo de Facturación:</strong> Total de XMLs de facturas extraídos.<br>• <strong>Procesados Hoy:</strong> Lo ingresado hoy.<br>• <strong>Tasa de éxito:</strong> Porcentaje de descargas correctas.<br>• <strong>Duplicados Prevenidos:</strong> Filtra facturas repetidas para no duplicar datos.' 
+  {
+    view: 'dashboard', target: '#connectors-grid', icon: '🔗',
+    title: 'Mis Conexiones Fiscales',
+    text: 'Cada tarjeta representa un <strong>conector activo</strong>: un pipeline que extrae datos de un país fiscal y los carga en tu DWH. Puedes tener múltiples conectores simultáneos según tu plan.',
   },
-  { 
-    view: 'wizard', 
-    wizardStep: 1,
-    target: '.source-grid', 
-    title: '🌎 Origen Fiscal (Paso 1)', 
-    text: 'En este paso eliges la entidad tributaria del gobierno de la cual quieres extraer los datos. Por ejemplo: <strong>Ecuador · SRI</strong>.' 
+  {
+    view: 'dashboard', target: '#run-btn', icon: '▶️',
+    title: 'Ejecutar Pipeline Manual',
+    text: 'Este botón lanza una sincronización <strong>ahora mismo</strong>. El sistema se autentica con el ente fiscal, descarga los comprobantes nuevos y los carga en tu destino. El resultado aparece en la consola de logs.',
   },
-  { 
-    view: 'wizard', 
-    wizardStep: 2,
-    target: '.form-grid', 
-    title: '🔒 Credenciales y Cifrado (Paso 2)', 
-    text: 'Aquí ingresas tu RUC/RFC y subes tu archivo de <strong>Firma Electrónica (.p12)</strong>. Es obligatorio para que el sistema pueda autenticarse con el gobierno. Para tu seguridad, se cifran localmente con el estándar militar <strong>AES-256</strong>.' 
+  {
+    view: 'wizard', wizardStep: 1, target: '.source-grid', icon: '🌎',
+    title: 'Nueva Conexión — Paso 1: Origen Fiscal',
+    text: 'Elige la entidad tributaria del país del que quieres extraer datos: <strong>SRI (Ecuador)</strong>, <strong>SAT (México)</strong>, <strong>SUNAT (Perú)</strong> o <strong>DIAN (Colombia)</strong>. Tu plan determina cuántos países puedes activar.',
   },
-  { 
-    view: 'wizard', 
-    wizardStep: 3,
-    target: '.dest-grid', 
-    title: '☁️ Destino Data Warehouse (Paso 3)', 
-    text: 'Aquí seleccionas el almacén de datos (como <strong>Google BigQuery, Snowflake o Amazon Redshift</strong>) a donde se enviarán todas tus facturas ya ordenadas y listas para auditoría o contabilidad.' 
+  {
+    view: 'wizard', wizardStep: 2, target: '.form-grid', icon: '🔒',
+    title: 'Paso 2: Credenciales y Cifrado AES-256',
+    text: 'Ingresa tu RUC/RFC y sube tu <strong>Firma Electrónica (.p12)</strong>. Todo se cifra localmente con <strong>AES-256</strong> (estándar militar) antes de guardarse. Nadie — ni nosotros — puede leer tus credenciales en texto plano. <span style="color:#818cf8">RNF03</span>',
   },
-  { 
-    view: 'logs', 
-    target: '.terminal-panel', 
-    title: '💻 Consola de Logs e Historial', 
-    text: 'Esta pantalla técnica registra detalladamente cada conexión bajo el estándar <strong>ISO 8601</strong>. Sirve para que tu área de sistemas pueda monitorear, depurar errores (por ejemplo, si pusiste mal tu contraseña) y auditar todo el flujo.' 
-  }
+  {
+    view: 'wizard', wizardStep: 3, target: '.dest-grid', icon: '☁️',
+    title: 'Paso 3: Destino Data Warehouse',
+    text: 'Elige dónde se cargarán tus facturas: <strong>Google BigQuery</strong>, <strong>Snowflake</strong> o <strong>Amazon Redshift</strong>. Los datos llegan normalizados, con esquema relacional y timestamps en <strong>ISO 8601</strong>.',
+  },
+  {
+    view: 'logs', target: '.terminal-panel', icon: '💻',
+    title: 'Historial y Consola de Logs',
+    text: 'Aquí verás el log de cada ejecución en tiempo real. Cada línea tiene timestamp <strong>ISO 8601</strong>, nivel de severidad (INFO, DEBUG, WARNING, ERROR) y el mensaje. Ideal para auditoría, debugging y soporte técnico. <span style="color:#818cf8">RF17 · RF20</span>',
+  },
 ];
 
-function clearHighlights() {
-  document.querySelectorAll('.tut-highlight').forEach(el => {
-    el.classList.remove('tut-highlight');
-  });
-}
+/* ── Pasos del Panel Admin (8 pasos) ────────────────────────────────────────── */
+const ADMIN_TUT_STEPS = [
+  {
+    view: 'apis', target: '.sidebar-brand', icon: '🛡️',
+    title: '¡Bienvenido al Panel Administrador!',
+    text: 'Este es el <strong>Centro de Control</strong> interno de ConectorLatam. Desde aquí monitoreas el estado de las APIs fiscales gubernamentales, gestionas clientes, facturas y la seguridad de toda la plataforma.',
+  },
+  {
+    view: 'apis', target: '.api-health-grid', icon: '🩺',
+    title: 'Estado de APIs Fiscales en Tiempo Real',
+    text: 'Monitoreo continuo de los 4 endpoints gubernamentales: <strong>SRI, SAT, SUNAT, DIAN</strong>. Ves latencia, uptime, número de llamadas, tasa de error y validez del certificado TLS. El sistema detecta degradaciones automáticamente.',
+  },
+  {
+    view: 'alerts', target: '.alerts-list', icon: '🔔',
+    title: 'Alertas del Sistema',
+    text: 'Cuando una API se degrada, un certificado está por vencer o un pago falla, el sistema genera una <strong>alerta con severidad</strong> (ERROR / WARNING / INFO). Puedes marcarlas como revisadas para hacer seguimiento.',
+  },
+  {
+    view: 'metrics', target: '#admin-kpi-grid', icon: '📈',
+    title: 'Métricas Globales de la Plataforma',
+    text: 'Vista ejecutiva del negocio: <strong>MRR, ARR, churn rate, NPS</strong>, pipelines activos, registros procesados y distribución de llamadas API por país. Actualización en tiempo real.',
+  },
+  {
+    view: 'clients', target: '.activity-table-wrapper', icon: '🏢',
+    title: 'Gestión de Organizaciones',
+    text: 'Tabla completa de todos los clientes: nombre, país, plan, pipelines activos, registros procesados en el ciclo actual, usuarios y estado. Puedes buscar por nombre o país usando el buscador.',
+  },
+  {
+    view: 'users', target: '.activity-table-wrapper', icon: '👥',
+    title: 'Usuarios del Sistema',
+    text: 'Lista de todos los usuarios registrados con su rol (<strong>Admin / Operator / Viewer</strong>), organización, plan y último login. Los roles controlan el acceso a cada funcionalidad. <span style="color:#818cf8">RF16</span>',
+  },
+  {
+    view: 'billing', target: '#billing-kpi-grid', icon: '💰',
+    title: 'Facturación y Cobros',
+    text: 'Panel financiero con <strong>MRR, ARR, facturas pendientes y vencidas</strong>. La tabla de facturas muestra el historial completo con método de pago, monto y estado (PAID / PENDING / OVERDUE).',
+  },
+  {
+    view: 'audit', target: '.activity-table-wrapper', icon: '🔐',
+    title: 'Log de Auditoría Inmutable',
+    text: 'Registro cronológico <strong>inmutable</strong> de todas las acciones: logins, cambios de plan, ejecuciones de pipelines, alertas, cobros. Exportable a CSV. Cumple con <span style="color:#818cf8">RF13 · RF17</span>.',
+  },
+];
 
-function positionPopover(targetEl) {
-  const popover = document.getElementById('tutorial-popover');
-  if (!popover) return;
-  
-  if (!targetEl) {
-    popover.style.top = '50%';
-    popover.style.left = '50%';
-    popover.style.transform = 'translate(-50%, -50%)';
-    return;
-  }
-  
-  const rect = targetEl.getBoundingClientRect();
-  const popoverWidth = popover.offsetWidth || 350;
-  const popoverHeight = popover.offsetHeight || 220;
-  
-  const spaceBelow = window.innerHeight - rect.bottom;
-  const spaceAbove = rect.top;
-  const spaceRight = window.innerWidth - rect.right;
-  const spaceLeft = rect.left;
-  
-  let top, left;
-  
-  if (spaceBelow > popoverHeight + 30) {
-    top = rect.bottom + 15;
-    left = rect.left + (rect.width - popoverWidth) / 2;
-  } else if (spaceAbove > popoverHeight + 30) {
-    top = rect.top - popoverHeight - 15;
-    left = rect.left + (rect.width - popoverWidth) / 2;
-  } else if (spaceRight > popoverWidth + 30) {
-    top = rect.top + (rect.height - popoverHeight) / 2;
-    left = rect.right + 15;
-  } else if (spaceLeft > popoverWidth + 30) {
-    top = rect.top + (rect.height - popoverHeight) / 2;
-    left = rect.left - popoverWidth - 15;
-  } else {
-    popover.style.top = '50%';
-    popover.style.left = '50%';
-    popover.style.transform = 'translate(-50%, -50%)';
-    return;
-  }
-  
-  left = Math.max(20, Math.min(left, window.innerWidth - popoverWidth - 20));
-  top = Math.max(20, Math.min(top, window.innerHeight - popoverHeight - 20));
-  
-  popover.style.top = `${top}px`;
-  popover.style.left = `${left}px`;
-  popover.style.transform = 'none';
-}
-
-function startTutorial() {
+/* ── Motor unificado ────────────────────────────────────────────────────────── */
+function startClientTutorial() {
+  tutMode = 'client';
+  tutStepsActive = CLIENT_TUT_STEPS;
   tutStep = 0;
-  document.getElementById('tutorial-overlay').classList.remove('hidden');
-  document.getElementById('tutorial-popover').classList.remove('hidden');
+  _tutLaunch();
+}
+
+function startAdminTutorial() {
+  tutMode = 'admin';
+  tutStepsActive = ADMIN_TUT_STEPS;
+  tutStep = 0;
+  _tutLaunch();
+}
+
+function startTutorial() { startClientTutorial(); } // legacy alias
+
+function _tutLaunch() {
+  document.getElementById('tutorial-overlay')?.classList.remove('hidden');
+  document.getElementById('tutorial-popover')?.classList.remove('hidden');
+  // Badge del portal
+  const badge = document.getElementById('tut-portal-badge');
+  if (badge) {
+    badge.textContent = tutMode === 'admin' ? 'Panel Admin' : 'Portal Cliente';
+    badge.className   = tutMode === 'admin' ? 'tut-portal-badge tut-portal-badge--admin' : 'tut-portal-badge';
+  }
   renderTutorialStep();
 }
+
+// Reposicionar popover si el viewport cambia (ej. resize, zoom)
+window.addEventListener('resize', () => {
+  const popover = document.getElementById('tutorial-popover');
+  if (popover && !popover.classList.contains('hidden')) positionPopover();
+});
+
 function nextTutorialStep() {
   tutStep++;
-  if (tutStep >= tutSteps.length) endTutorial();
+  if (tutStep >= tutStepsActive.length) endTutorial();
   else renderTutorialStep();
 }
+
+function prevTutorialStep() {
+  if (tutStep > 0) { tutStep--; renderTutorialStep(); }
+}
+
 function endTutorial() {
   clearHighlights();
-  document.getElementById('tutorial-overlay').classList.add('hidden');
-  document.getElementById('tutorial-popover').classList.add('hidden');
+  document.getElementById('tutorial-overlay')?.classList.add('hidden');
+  document.getElementById('tutorial-popover')?.classList.add('hidden');
 }
+
+function clearHighlights() {
+  document.querySelectorAll('.tut-highlight').forEach(el => el.classList.remove('tut-highlight'));
+}
+
 function renderTutorialStep() {
   clearHighlights();
-  const step = tutSteps[tutStep];
-  
-  if (step.view) {
-    showView(step.view);
-  }
-  if (step.view === 'wizard' && step.wizardStep) {
-    goToStep(step.wizardStep);
-  }
+  const step  = tutStepsActive[tutStep];
+  const total = tutStepsActive.length;
 
-  document.getElementById('tut-step').textContent = `Paso ${tutStep + 1} de ${tutSteps.length}`;
+  // Navegar a la vista correcta
+  if (tutMode === 'admin' && step.view) {
+    showAdminView(step.view);
+  } else if (tutMode === 'client' && step.view) {
+    showClientView(step.view);
+  }
+  if (step.wizardStep) setTimeout(() => goToStep(step.wizardStep), 50);
+
+  // Actualizar contenido del popover
+  document.getElementById('tut-step').textContent  = `Paso ${tutStep + 1} de ${total}`;
+  document.getElementById('tut-icon').textContent  = step.icon || '💡';
   document.getElementById('tut-title').textContent = step.title;
-  document.getElementById('tut-text').innerHTML = step.text;
-  document.getElementById('tut-next-btn').textContent = tutStep === tutSteps.length - 1 ? 'Finalizar ✓' : 'Siguiente →';
+  document.getElementById('tut-text').innerHTML    = step.text;
 
-  // Esperar un breve momento a que el DOM y el scroll se estabilicen
+  // Barra de progreso
+  const pct = ((tutStep + 1) / total) * 100;
+  const fill = document.getElementById('tut-progress-fill');
+  if (fill) fill.style.width = `${pct}%`;
+
+  // Botón Anterior
+  const prevBtn = document.getElementById('tut-prev-btn');
+  if (prevBtn) prevBtn.disabled = (tutStep === 0);
+
+  // Botón Siguiente / Finalizar
+  const nextBtn = document.getElementById('tut-next-btn');
+  if (nextBtn) {
+    const isLast = tutStep === total - 1;
+    nextBtn.textContent = isLast ? '¡Listo! ✓' : 'Siguiente →';
+    nextBtn.className   = isLast ? 'tut-next-btn tut-next-btn--finish' : 'tut-next-btn';
+  }
+
+  // Resaltar elemento y hacer scroll seguro (sin mover el popover cerca del elemento)
   setTimeout(() => {
+    positionPopover(); // siempre en esquina segura
     if (step.target) {
-      const el = document.querySelector(step.target);
+      const targetScope = tutMode === 'admin' ? '#portal-admin' : '#portal-client';
+      const el = document.querySelector(`${targetScope} ${step.target}`) || document.querySelector(step.target);
       if (el) {
         el.classList.add('tut-highlight');
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => positionPopover(el), 120);
-      } else {
-        positionPopover(null);
+        // Scroll seguro: deja el elemento visible sin chocar con el popover
+        const rect = el.getBoundingClientRect();
+        const POPOVER_H = 260; // alto estimado del popover
+        const safeBottom = window.innerHeight - POPOVER_H - 20;
+        if (rect.top < 60 || rect.bottom > safeBottom) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
-    } else {
-      positionPopover(null);
     }
-  }, 100);
+  }, 120);
+}
+
+/**
+ * Posiciona el popover siempre en una esquina segura de la pantalla.
+ * El popover NUNCA se coloca junto al elemento resaltado (eso causa que
+ * quede fuera del viewport o detrás de capas). El highlight/ring se encarga
+ * de indicar visualmente qué elemento se está describiendo.
+ */
+function positionPopover() {
+  const popover = document.getElementById('tutorial-popover');
+  if (!popover) return;
+
+  const PW = popover.offsetWidth  || 380;
+  const PH = popover.offsetHeight || 260;
+  const VW = window.innerWidth;
+  const VH = window.innerHeight;
+  const PAD = 20; // margen desde el borde de pantalla
+
+  // En pantallas anchas: esquina inferior derecha
+  // En pantallas angostas (<600px): centrado en la parte inferior
+  if (VW >= 600) {
+    popover.style.left      = `${VW - PW - PAD}px`;
+    popover.style.top       = `${VH - PH - PAD}px`;
+    popover.style.transform = 'none';
+  } else {
+    popover.style.left      = `${PAD}px`;
+    popover.style.top       = `${VH - PH - PAD}px`;
+    popover.style.transform = 'none';
+    popover.style.width     = `${VW - PAD * 2}px`;
+  }
 }
 
 // ─── Toasts ─────────────────────────────────────────────────────────────────────

@@ -1,0 +1,80 @@
+﻿Backlog del Producto;;;;;;;;;;
+Nombre del Proyecto:;;ConectorLatam;;;;;;;;
+Dueño del Producto;;Integrantes: Juan Espinosa, Juan García y Renato Rojas;;;;;;;;
+;;;;;;;;;;
+EPICA;;;;HISTORIA DE USUARIO;;;;OTROS DATOS DE LA EPICA O HISTORIA DE USUARIO;;
+ID Épica;Como (Rol);Deseo…;Para…;ID Historia de Usuario;Como (Rol)…;Deseo….;Para….;Criterios de Aceptación;Sprint;Comentarios (RF)
+EP01;Data engineer / Equipo de datos;Conectar los sistemas fiscales latinoamericanos (SRI, SAT, SUNAT, DIAN) de forma nativa;Extraer comprobantes electrónicos autorizados sin escribir ni mantener código de integración personalizado;HU01;Data engineer;conectar mi cuenta del SRI Ecuador usando certificado digital o RUC+clave;extraer comprobantes electrónicos autorizados directamente sin scripts ad-hoc;El conector SRI autentica correctamente con RUC+clave y con certificado. Extrae facturas, notas de crédito y retenciones. Registros devueltos coinciden con el portal oficial.;0;RF01
+;;;;HU02;Data engineer;conectar mi cuenta del SAT México usando RFC y FIEL;extraer CFDI autorizados desde el servicio web oficial sin código personalizado;El conector SAT autentica con RFC+FIEL. Descarga CFDI emitidos y recibidos. Respuesta en menos de 10 s para consultas de hasta 500 registros.;1;RF02
+;;;;HU03;Data engineer;conectar mi cuenta de la SUNAT Perú mediante RUC y clave SOL;extraer comprobantes electrónicos peruanos sin mantener código de integración;El conector SUNAT autentica con RUC y clave SOL. Extrae facturas y boletas electrónicas. Error con credenciales inválidas muestra mensaje descriptivo.;1;RF03
+;;;;HU04;Data engineer;conectar mi cuenta de la DIAN Colombia usando NIT y mecanismo de autenticación oficial;extraer facturas electrónicas colombianas autorizadas sin código ad-hoc;El conector DIAN autentica con NIT y token oficial. Extrae facturas electrónicas y documentos equivalentes. Maneja correctamente el paginado de resultados.;1;RF04
+;;;;HU05;Data engineer;filtrar cada extracción por rango de fechas, tipo de comprobante (factura, NC, retención) y estado (autorizado/anulado);obtener exactamente los datos necesarios sin procesar volúmenes innecesarios ni sobrescribir datos válidos;Filtros de fecha, tipo y estado funcionan individualmente y combinados. Resultado coincide con la consulta directa en el portal fiscal. Parámetros inválidos muestran mensaje de error claro.;0;RF11
+;;;;HU06;Data engineer;activar la extracción incremental para que el sistema procese solo los comprobantes nuevos o modificados desde la última ejecución exitosa;reducir el tiempo de procesamiento y evitar recargar datos ya existentes en el data warehouse;Modo incremental extrae solo documentos con fecha de autorización posterior al último checkpoint. El checkpoint se actualiza solo si la ejecución termina con éxito. Verificable comparando con extracción completa.;2;RF14
+EP02;Data engineer / CTO;Cargar los datos fiscales directamente a los principales Data Warehouses en la nube;Centralizar los datos fiscales en la infraestructura de datos existente sin pasos manuales adicionales;HU07;Data engineer;cargar los datos fiscales extraídos directamente a Google BigQuery creando o actualizando las tablas correspondientes;centralizar mis datos fiscales en BigQuery sin manipulación manual de archivos;Los datos llegan a BigQuery con el esquema correcto por tipo de comprobante y país. La carga a una tabla de 10 000 registros tarda menos de 5 min. Registros en BigQuery coinciden con los extraídos.;0;RF05
+;;;;HU08;Data engineer;cargar los datos fiscales directamente a Snowflake respetando el esquema de destino definido;centralizar datos en Snowflake sin cambiar nuestra infraestructura de datos actual;Los datos llegan a Snowflake con tipos correctos. El sistema valida el esquema antes de iniciar la carga y advierte sobre incompatibilidades. Sin datos duplicados en la tabla de destino.;1;RF06
+;;;;HU09;Data engineer;cargar los datos fiscales directamente a Amazon Redshift con soporte para esquemas personalizados;integrar los datos fiscales en nuestro stack de datos AWS sin infraestructura adicional;Los datos llegan a Redshift sin errores de tipo. El sistema gestiona el COPY desde S3 de forma transparente. La carga falla con mensaje claro si el esquema es incompatible.;2;RF07
+;;;;HU10;Data engineer;ver una vista previa de hasta 100 registros con el esquema de destino antes de confirmar la carga al DWH;detectar errores de formato o esquema antes de que lleguen al data warehouse de producción;La vista previa muestra máx. 100 registros con tipos de datos. El usuario puede confirmar o cancelar antes de la carga. El esquema mostrado coincide con el que se cargará.;0;RF19
+;;;;HU11;Data engineer;que el sistema identifique y omita automáticamente registros duplicados usando el número de comprobante como clave primaria;garantizar la integridad de los datos en el DWH sin requerir limpieza manual posterior;Con una tabla que ya contiene registros, una segunda carga de los mismos documentos no genera duplicados. El log indica cuántos registros fueron omitidos por duplicados.;1;RF18
+EP03;Data engineer / Desarrollador;Orquestar y automatizar los pipelines ETL sin intervención manual;Ejecutar las extracciones y cargas de forma desatendida, programada y recuperable ante fallos;HU12;Data engineer;programar extracciones automáticas con frecuencia diaria, semanal, mensual o mediante expresión cron personalizada;automatizar el proceso de integración sin necesidad de intervención manual recurrente;El pipeline se ejecuta en el horario configurado ±1 min. Si el horario cae en ventana de mantenimiento, se reintenta en la siguiente ventana disponible. Historial de ejecuciones muestra los registros automáticos.;1;RF08
+;;;;HU13;Data engineer;que el sistema reintente automáticamente una extracción fallida hasta 3 veces con intervalos de espera exponencial (1, 2 y 4 min) antes de notificar el fallo definitivo;minimizar el impacto de fallos transitorios de red o del sistema fiscal sin intervención manual;Ante un fallo transitorio simulado, el sistema reintenta exactamente 3 veces. Los intervalos son 1, 2 y 4 min respectivamente. Tras 3 fallos consecutivos, se envía notificación de fallo definitivo.;2;RF21
+;;;;HU14;Desarrollador;acceder a una API REST documentada en formato OpenAPI/Swagger para disparar extracciones y consultar estados de pipeline programáticamente;integrar ConectorLatam dentro de mis pipelines, DAGs de Airflow o sistemas internos existentes;La API REST expone endpoints para: crear ejecución, consultar estado y listar ejecuciones. Documentación Swagger disponible en /api/docs. Autenticación mediante API key. Respuestas en JSON con código HTTP estándar.;3;RF23
+;;;;HU15;Data engineer;descargar los datos extraídos en formato CSV o JSON con codificación UTF-8 y delimitadores configurables;usar los datos en herramientas de BI locales o enviarlos a destinos que no son un DWH en la nube;El botón de descarga genera el archivo en el formato seleccionado. CSV tiene cabeceras en la primera fila. JSON es un array de objetos. Codificación UTF-8 verificable. Descarga funcional con más de 10 000 registros.;3;RF25
+EP04;Data engineer / Gerente de operaciones;Monitorear el estado de las integraciones y recibir alertas ante fallos o anomalías;Detectar y resolver problemas en los pipelines sin depender del equipo técnico para tener visibilidad;HU16;Gerente de operaciones;ver un dashboard en tiempo real con el estado de todas las integraciones activas (última ejecución, registros procesados, tiempo y estado);tener visibilidad completa del estado de los datos fiscales sin necesitar revisar logs ni consultar al equipo técnico;El dashboard muestra todas las integraciones con: estado (activo/fallo/en proceso), timestamp de última ejecución, registros procesados y duración. Se actualiza sin recargar la página. Estado incorrecto no aparece como exitoso.;0;RF09
+;;;;HU17;Data engineer;recibir alertas automáticas por correo electrónico y webhook cuando una extracción falle, se demore o detecte un cambio en la API fiscal;actuar de inmediato ante problemas y minimizar el tiempo de inactividad de los reportes fiscales;Al forzar un fallo, se recibe correo en menos de 5 min. El webhook incluye payload JSON con: pipeline_id, timestamp, tipo de error y pipeline_run_id. Los canales son configurables por pipeline.;2;RF13
+;;;;HU18;Data engineer;consultar el historial de las últimas ejecuciones de cada pipeline (mín. 90 días), filtrable por estado (éxito/fallo) y rango de fechas;depurar problemas y auditar el comportamiento del pipeline sin necesitar acceso a los servidores;El historial muestra todas las ejecuciones del período. Los filtros funcionan combinados. Cada entrada incluye: fecha, duración, registros procesados, estado y enlace al log detallado.;2;RF20
+;;;;HU19;Data engineer;ver los errores a nivel de registro individual con el ID del comprobante fallido y la causa del error;corregir selectivamente solo los registros con problemas sin reprocesar todo el lote de datos;El log de errores lista cada registro fallido con: número de comprobante, campo con error y descripción de la causa. El log es descargable en CSV. Un lote con 5 errores muestra exactamente 5 entradas en el log.;3;RF22, RF26
+EP05;Administrador de TI / CTO;Gestionar usuarios, credenciales fiscales y permisos de acceso con seguridad empresarial;Proteger las credenciales fiscales, controlar el acceso por rol y garantizar la trazabilidad de todas las operaciones;HU20;Administrador de TI;registrar, actualizar y revocar credenciales de acceso a los sistemas fiscales, almacenadas cifradas con AES-256 y nunca visibles en texto plano;cumplir las políticas de seguridad de la empresa y evitar la exposición de credenciales fiscales sensibles;Las credenciales no aparecen en logs ni en la interfaz tras ser guardadas. El cifrado AES-256 es verificable en la auditoría de seguridad. Al revocar una credencial, las extracciones asociadas fallan inmediatamente con error de autenticación.;0;RF10
+;;;;HU21;Administrador de TI;gestionar múltiples empresas o identificadores fiscales (RUC, RFC, NIT) desde una sola cuenta con aislamiento total de datos entre organizaciones;centralizar la administración de todas las integraciones del grupo empresarial sin cambiar de sesión ni mezclar datos;Cada empresa ve solo sus propios datos y pipelines. Un usuario de la empresa A no puede acceder a datos de la empresa B. Se puede crear, editar y eliminar empresas desde el panel de administración.;2;RF15
+;;;;HU22;Administrador de TI;asignar roles (Administrador, Operador, Visor) a los usuarios de mi organización con permisos diferenciados por acción;controlar el acceso según el nivel de responsabilidad de cada persona y evitar cambios no autorizados;El Visor solo puede consultar dashboards e historiales. El Operador puede ejecutar y programar pipelines. Solo el Administrador puede gestionar credenciales y usuarios. Los permisos se aplican en tiempo real sin necesidad de reiniciar sesión.;2;RF16
+;;;;HU23;CTO;consultar un log de auditoría inmutable con todas las operaciones de extracción y carga, incluyendo usuario, timestamp, parámetros y resultado;garantizar la trazabilidad completa para cumplimiento normativo y detectar accesos no autorizados;El log registra cada operación con: usuario, timestamp UTC, acción, parámetros y resultado. No es editable ni eliminable desde la interfaz. Exportable en CSV. Cada registro cargado al DWH contiene pipeline_run_id trazable al log.;3;RF13, RF17
+EP06;Usuario nuevo / Cliente;Configurar la primera integración de forma autónoma y controlar el consumo del plan;Reducir el tiempo de onboarding y dar visibilidad del uso para facilitar la adopción y el control de costos;HU24;Usuario nuevo;configurar mi primera integración mediante una guía paso a paso con documentación contextual y tooltips en cada campo;completar el onboarding en menos de 15 minutos de forma autónoma sin necesitar soporte técnico externo;Una persona técnica sin experiencia previa completa la configuración en ≤15 min (medido en prueba con 5 usuarios). Los tooltips describen cada parámetro. Completar el flujo sin abandonar la guía en el 90% de los casos.;4;RF31
+;;;;HU25;Cliente / Administrador;consultar mi consumo actual del plan (registros procesados, conectores activos) y la fecha del próximo ciclo de facturación;planificar el uso del servicio y controlar los costos antes de superar los límites del plan contratado;El panel de consumo muestra: registros procesados en el ciclo actual, conectores activos y fecha de renovación. Los datos se actualizan tras cada ejecución completada. Una alerta visual aparece al superar el 80% del límite del plan.;4;RF28
+;;;;;;;;;;
+;;;;;;;;;;
+Sprint Backlog;;;;;;;;;;
+;;;;;;;;;;
+Sprint;Tiempo;Historia de usuario;Alcance;;;;;;;
+0;Semana 6-8;HU01, HU05, HU07, HU10, HU16, HU20;MVP;;;;;;;
+1;Semana 9-10;HU02, HU03, HU04, HU08, HU11, HU12;Desarrollo;;;;;;;
+2;Semana 11-12;HU06, HU09, HU13, HU17, HU18, HU21, HU22;Desarrollo;;;;;;;
+3;Semana 13-14;HU14, HU15, HU19, HU23;Desarrollo;;;;;;;
+4;Semana 15;HU24, HU25;Despliegue;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+Sprint Backlog;;;;;;;;;;
+;;;;;;;;;;
+Sprint;Tiempo;Historia de usuario;Alcance;;;;;;;
+0;Semana 6-8;;MVP;;;;;;;
+1;Semana 9-10;;Desarrollo;;;;;;;
+2;Semana 11-12;;Desarrollo;;;;;;;
+3;Semana 13-14;;Desarrollo;;;;;;;
+4;Semana 15;;Despliegue;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
