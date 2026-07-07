@@ -218,6 +218,74 @@ def get_me():
         "organizationId": g.user.get("organizationId"),
     })
 
+@app.route('/api/auth/register', methods=['POST'])
+def auth_register():
+    """
+    Endpoint público para auto-registro de clientes.
+    Asigna automáticamente el rol 'org_admin' y crea un organizationId.
+    """
+    data = request.json or {}
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+    display_name = data.get('displayName', email).strip()
+    org_name = data.get('orgName', 'Mi Empresa').strip()
+
+    if not email or not password:
+        return jsonify({"error": "Email y contraseña son requeridos"}), 400
+    if len(password) < 6:
+        return jsonify({"error": "La contraseña debe tener al menos 6 caracteres"}), 400
+
+    try:
+        # 1. Crear usuario en Firebase Auth
+        firebase_user = firebase_auth.create_user(
+            email=email,
+            password=password,
+            display_name=display_name
+        )
+        uid = firebase_user.uid
+
+        # 2. Generar org_id único
+        import uuid
+        org_id = f"org_{str(uuid.uuid4())[:8]}"
+
+        # 3. Crear el documento del usuario en Firestore
+        from datetime import datetime, timezone
+        now_iso = datetime.now(timezone.utc).isoformat()
+        profile = {
+            'email':          email,
+            'displayName':    display_name,
+            'role':           'org_admin',  # Rol forzado para auto-registro
+            'organizationId': org_id,
+            'createdAt':      now_iso,
+            'lastLogin':      None,
+            'status':         'active'
+        }
+        firestore_db.collection('users').document(uid).set(profile)
+
+        # 4. Crear la organización en la DB (o simular en db.py por ahora si se usa db.py)
+        # En el futuro esto también debería ir a Firestore, pero por ahora en db.organizations
+        db.organizations[org_id] = {
+            "name": org_name,
+            "taxId": "0000000000001",
+            "country": "Desconocido",
+            "plan": "starter",
+            "status": "active",
+            "createdAt": now_iso
+        }
+
+        return jsonify({
+            "success": True,
+            "uid": uid,
+            "role": "org_admin",
+            "organizationId": org_id
+        }), 201
+
+    except firebase_auth.EmailAlreadyExistsError:
+        return jsonify({"error": f"El email '{email}' ya está registrado"}), 409
+    except Exception as e:
+        print(f"[auth_register] Error: {e}")
+        return jsonify({"error": f"Error al registrarse: {str(e)}"}), 500
+
 # ─── ENDPOINTS DE CLIENTES (organizaciones) ───────────────────────────────────
 # Accesibles por: org_admin, operator, viewer (cada uno con su nivel)
 # El super_admin NO usa estos endpoints; tiene los de /api/admin/*

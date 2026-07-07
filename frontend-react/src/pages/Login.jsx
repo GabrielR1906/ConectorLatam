@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Activity } from 'lucide-react';
 
@@ -18,21 +18,12 @@ export default function Login() {
       setLoading(true);
       await login(email, password);
 
-      // La redirección se hace por rol real del usuario (no por email hardcodeado).
-      // userProfile se carga en AuthContext tras el login; esperamos un tick para
-      // que el estado se actualice, luego leemos el rol.
-      // Nota: en la simulación local se redirige siempre a /client/dashboard
-      // hasta que el backend devuelva el perfil real.
+      // La redirección se hace automáticamente por el RoleRoute en base a los roles,
+      // pero aquí hacemos la redirección inicial según lo que devuelva el context.
+      // Damos 500ms para asegurar que el token se validó en el backend.
       setTimeout(() => {
-        // Leer el perfil actualizado desde el localStorage de la sesión actual
-        // En producción, el AuthContext habrá llenado userProfile antes de este punto
-        const storedRole = window.__simulatedRole || 'org_admin';
-        if (storedRole === 'super_admin') {
-          navigate('/admin/apis');
-        } else {
-          navigate('/client/dashboard');
-        }
-      }, 100);
+        navigate('/client/dashboard');
+      }, 500);
     } catch (err) {
       setError('Fallo al iniciar sesión. Revisa tus credenciales.');
       console.error(err);
@@ -92,6 +83,10 @@ export default function Login() {
             >
               {loading ? 'Cargando...' : 'Entrar al Dashboard'}
             </button>
+
+            <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              ¿No tienes cuenta? <Link to="/register" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Regístrate aquí</Link>
+            </div>
           </form>
         </div>
       </div>
