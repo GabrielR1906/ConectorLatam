@@ -66,7 +66,13 @@ import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
 
 # Configurar Firebase Admin
-cred = credentials.Certificate(os.path.join(os.path.dirname(__file__), 'firebase-credentials.json'))
+# En Render.com los Secret Files se guardan en /etc/secrets/<filename>
+# En local se busca en el mismo directorio que app.py
+_RENDER_CREDS = '/etc/secrets/firebase-credentials.json'
+_LOCAL_CREDS  = os.path.join(os.path.dirname(__file__), 'firebase-credentials.json')
+_CREDS_PATH   = _RENDER_CREDS if os.path.exists(_RENDER_CREDS) else _LOCAL_CREDS
+
+cred = credentials.Certificate(_CREDS_PATH)
 firebase_admin.initialize_app(cred)
 
 # ═══════════════════════════════════════════════════════════════════════════════
