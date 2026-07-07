@@ -1,0 +1,77 @@
+<html><head><meta charset='utf-8'><style>body{font-family: Arial, sans-serif; line-height: 1.6; padding: 40px;} h1,h2{color: #2c3e50;} blockquote{background: #f1f5f9; border-left: 5px solid #3b82f6; padding: 10px; margin: 10px 0;}</style></head><body><h1>Manual de Usuario: ConectorLatam MVP v2</h1>
+<blockquote>
+<p>[!NOTE]
+<strong>ConectorLatam</strong> es una plataforma SaaS B2B especializada en <strong>ETL Fiscal (Extraer, Transformar y Cargar)</strong> para Latinoamérica. </p>
+</blockquote>
+<h2>1. ¿Para qué sirve el programa?</h2>
+<p>En muchas empresas latinoamericanas, el equipo de contabilidad tiene que entrar manualmente a las páginas del gobierno (como el SRI en Ecuador o el SAT en México) para descargar las facturas electrónicas, transformarlas en Excel y luego subirlas a sus sistemas. </p>
+<p><strong>ConectorLatam automatiza todo este proceso.</strong> Permite a las empresas configurar una conexión segura directa con el gobierno para que sus facturas y retenciones se descarguen de manera automática e incremental, y se envíen de inmediato a grandes bases de datos (Data Warehouses) como Google BigQuery, Snowflake o Amazon Redshift, listas para ser analizadas o auditadas sin intervención humana.</p>
+<hr />
+<h2>2. Flujo para Ejecutarlo</h2>
+<p>El programa está diseñado para ser "Plug &amp; Play" (conectar y usar). Solo necesitas ejecutar uno de los siguientes archivos ubicados en tu carpeta principal (<code>Program/</code>), dependiendo de lo que necesites:</p>
+<h3>Uso Local (Solo para ti)</h3>
+<ol>
+<li>Haz doble clic en <strong><code>instalar_y_ejecutar.bat</code></strong>.</li>
+<li>El sistema iniciará un servidor web interno.</li>
+<li>Se abrirá automáticamente tu navegador apuntando a <code>http://localhost:5000</code>.</li>
+</ol>
+<h3>Uso Público (Para compartir con inversores o compañeros)</h3>
+<ol>
+<li>Haz doble clic en <strong><code>compartir_enlace_publico.bat</code></strong>.</li>
+<li>Se iniciará el servidor interno.</li>
+<li>Presiona cualquier tecla cuando te lo pida la consola negra.</li>
+<li>Se abrirá el túnel seguro de <strong>ngrok</strong>. Copia el enlace que aparece junto a la palabra <em>Forwarding</em> (ej: <code>https://xxx.ngrok-free.dev</code>).</li>
+<li>Comparte ese enlace; cualquier persona en el mundo podrá ver tu aplicación.<blockquote>
+<p>[!WARNING]
+Recuerda que para usar el enlace público, debes haber configurado tu <strong>authtoken</strong> de ngrok previamente, como hicimos en nuestra sesión de soporte.</p>
+</blockquote>
+</li>
+</ol>
+<hr />
+<h2>3. ¿Qué hace cada sección y para qué sirve?</h2>
+<p>La interfaz gráfica (Frontend) está dividida en varias pantallas a las que accedes desde el menú lateral izquierdo:</p>
+<h3>📊 Dashboard de Monitoreo</h3>
+<p>Es la pantalla principal que ven los gerentes y analistas.
+* <strong>Sirve para:</strong> Tener una vista panorámica de la salud de las conexiones fiscales.
+* <strong>Qué hace:</strong> Muestra en tiempo real cuántas facturas se han descargado ("Ciclo de Facturación"), cuántos documentos se han ingresado hoy, la tasa de éxito de la conexión, y lo más importante: <strong>cuántos duplicados ha prevenido</strong> el sistema, ahorrando espacio y evitando errores contables.</p>
+<h3>🪄 Nuevo Pipeline</h3>
+<p>Es el asistente de configuración (Wizard) para crear una nueva conexión.
+* <strong>Sirve para:</strong> Instruir al sistema de dónde sacar los datos y a dónde enviarlos.
+* <strong>Qué hace:</strong> Te guía a través de 3 pasos lógicos:
+  1. Elegir la entidad de gobierno (Origen).
+  2. Subir de forma segura las credenciales y la Firma Electrónica (.p12), cifrándolas bajo estándar AES-256.
+  3. Elegir la base de datos empresarial de destino (ej. Snowflake).</p>
+<h3>💻 Consola de Logs (Historial)</h3>
+<p>Es una pantalla técnica para ingenieros y soporte.
+* <strong>Sirve para:</strong> Auditar qué está pasando "bajo el capó" de la plataforma.
+* <strong>Qué hace:</strong> Registra cada intento de conexión con el gobierno, mostrando pasos como <em>Descargando XML</em>, <em>Cifrando credenciales</em>, <em>Omitiendo duplicados</em>, etc. Usa el estándar de tiempo ISO 8601, obligatorio en auditorías corporativas.</p>
+<h3>💳 Planes y Precios</h3>
+<p>Es la fachada comercial del modelo SaaS (Software as a Service).
+* <strong>Sirve para:</strong> Mostrar el modelo de monetización (cómo gana dinero la empresa).
+* <strong>Qué hace:</strong> Limita las capacidades del usuario dependiendo de si paga el plan Starter ($149), Growth ($299) o Multi-LATAM ($499). Por ejemplo, el plan más barato bloquea el acceso a otros países que no sean Ecuador.</p>
+<h3>⚙️ Configuración (Icono de Engranaje superior derecho)</h3>
+<ul>
+<li><strong>Sirve para:</strong> Gestionar el perfil corporativo y las llaves (API Keys) de la empresa.</li>
+<li><strong>Qué hace:</strong> Te permite ver qué límites exactos tiene tu cuenta según el plan que estés pagando, y generar contraseñas seguras para integraciones de código.</li>
+</ul>
+<hr />
+<h2>4. Ejemplo Práctico: Lo que se quiere hacer y cómo hacerlo</h2>
+<p><strong>El Problema Real:</strong> 
+La <em>Corporación Demo LATAM S.A.</em> tiene su matriz en Ecuador. Cada mes procesan 15,000 facturas. El gerente de datos necesita que todas esas facturas lleguen automáticamente a <strong>Google BigQuery</strong> para que el equipo de Inteligencia de Negocios (BI) cree reportes en Tableau o PowerBI.</p>
+<p><strong>Cómo hacerlo en ConectorLatam:</strong></p>
+<ol>
+<li>Entras al sistema y notas que estás en el plan <strong>Starter</strong> (que casualmente te incluye acceso a Ecuador y a BigQuery).</li>
+<li>Haces clic en <strong>"Nuevo Pipeline"</strong> en el menú izquierdo.</li>
+<li><strong>Paso 1 (Origen):</strong> Seleccionas la tarjeta de <strong>SRI Ecuador</strong>. Le das a <em>Siguiente</em>.</li>
+<li><strong>Paso 2 (Credenciales):</strong> </li>
+<li>Escribes tu número de RUC.</li>
+<li>Escribes tu contraseña del portal del SRI.</li>
+<li>Haces clic en el recuadro para subir tu archivo de Firma Electrónica (o lo arrastras).</li>
+<li>Ingresas la clave de esa firma. Observarás cómo el sistema cifra tus datos con <strong>AES-256</strong> para que ningún hacker pueda robarlos. Le das a <em>Siguiente</em>.</li>
+<li><strong>Paso 3 (Destino):</strong> Seleccionas <strong>Google BigQuery</strong> de entre las opciones disponibles.</li>
+<li>Haces clic en <strong>"Guardar y Ejecutar Pipeline"</strong>.</li>
+<li>Verás un cartel de éxito. El sistema inmediatamente se pondrá a trabajar en segundo plano extrayendo esas 15,000 facturas y llevándolas a BigQuery.</li>
+<li>Si vas al <strong>Dashboard</strong>, verás los números subir en tiempo real.</li>
+<li>Si vas a la <strong>Consola de Logs</strong>, verás exactamente a qué hora el sistema se conectó al servidor del gobierno ecuatoriano y cómo completó la carga sin errores.</li>
+</ol>
+<p>¡Y eso es todo! La corporación ya no tendrá que descargar facturas a mano nunca más.</p></body></html>

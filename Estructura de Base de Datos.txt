@@ -1,0 +1,111 @@
+Estructura de Base de Datos Operativa (Firestore) - ConectorLatam
+Este documento define el diseño de las colecciones y documentos NoSQL en Firestore, optimizado para un entorno SaaS multi-tenant, priorizando la seguridad, el rendimiento en tiempo real para el Dashboard y el control de ejecuciones de los pipelines ETL.
+Estructura de Colecciones Principales
+●	users: Información de los usuarios y gestión de roles.
+●	organizations: Agrupación lógica de clientes y configuraciones de acceso.
+●	pipelines: Configuración de las tareas de extracción (origen, destino, frecuencia).
+●	pipeline_runs: Historial y estado de las ejecuciones individuales.
+1. Colección: users
+Almacena el perfil del usuario. La autenticación principal y los roles se gestionan mediante Custom Claims en Firebase Auth, pero este documento sirve para datos de visualización.
+/users/{userId}
+{
+  "email": "juan@example.com",
+  "displayName": "Juan Espinosa",
+  "role": "admin", // O "client"
+  "organizationId": "org_12345", // Referencia a la organización si es cliente
+  "createdAt": "2026-06-15T20:48:50Z",
+  "lastLogin": "2026-06-15T20:48:50Z"
+}
+
+2. Colección: organizations (Multi-Tenant)
+Permite agrupar pipelines bajo una misma empresa cliente. Todos los pipelines y ejecuciones de un cliente pertenecen a su organización.
+/organizations/{orgId}
+{
+  "name": "Empresa Cliente S.A.",
+  "taxId": "1790000000001", // RUC genérico de la empresa
+  "country": "EC", // Ecuador
+  "createdAt": "2026-06-15T20:48:50Z"
+}
+
+3. Colección: pipelines
+Almacena la configuración del trabajo ETL. Aquí es donde se define de dónde se saca la información, cómo se procesa y a dónde se envía.
+/pipelines/{pipelineId}
+{
+  "organizationId": "org_12345", // Vínculo a la empresa dueña
+  "name": "Extracción SRI Mensual",
+  "status": "active", // active, paused, error
+  "source": {
+    "type": "SRI_ECUADOR",
+    "authMethod": "CERTIFICATE",
+    "credentialsSecretId": "projects/my-gcp-project/secrets/sri_cert_org123/versions/1" // ¡REFERENCIA a Secret Manager, NO el archivo!
+  },
+  "destination": {
+    "type": "BIGQUERY",
+    "dataset": "tax_data_latam",
+    "table": "comprobantes_sri"
+  },
+  "filters": { // Correspondiente a la HU05
+    "documentTypes": ["factura", "nota_credito"],
+    "status": ["autorizado"],
+    "incrementalMode": true // Correspondiente a la HU06
+  },
+  "schedule": { // Correspondiente a la HU12
+    "cronExpression": "0 0 1 * *", // Día 1 de cada mes
+    "timezone": "America/Guayaquil"
+  },
+  "lastRunId": "run_98765", // Referencia rápida a la última ejecución
+  "createdAt": "2026-06-15T20:48:50Z",
+  "updatedAt": "2026-06-15T20:48:50Z"
+}
+
+4. Colección: pipeline_runs (Historial y Dashboard en Tiempo Real)
+Registra cada vez que un pipeline se ejecuta. Esta es la colección que alimenta el Dashboard (HU16).
+/pipeline_runs/{runId}
+{
+  "pipelineId": "pipeline_xyz",
+  "organizationId": "org_12345", // Para aplicar Reglas de Seguridad fácilmente
+  "status": "in_progress", // pending, in_progress, completed, failed
+  "startedAt": "2026-06-15T20:48:50Z",
+  "completedAt": null,
+  "metrics": {
+    "recordsExtracted": 0,
+    "recordsLoaded": 0,
+    "recordsDuplicated": 0 // Correspondiente a la HU11
+  },
+  "errorDetails": null, // Solo se llena si falla
+  "checkpointDate": "2026-05-31T23:59:59Z" // Para la extracción incremental (HU06)
+}
+
+5. Subcolección (Opcional pero Recomendada): error_logs
+Para la HU19 ("ver los errores a nivel de registro individual"), es mejor separar los errores detallados del documento de ejecución principal para no sobrecargar el límite de tamaño de 1MB por documento en Firestore.
+/pipeline_runs/{runId}/error_logs/{logId}
+{
+  "documentId": "001-001-000000123", // El número del comprobante que falló
+  "errorType": "SCHEMA_MISMATCH",
+  "description": "El tipo de dato en el campo 'monto' no coincide con el destino en Snowflake",
+  "timestamp": "2026-06-15T20:48:50Z"
+}
+
+Ejemplo de Reglas de Seguridad en Firestore (Security Rules)
+Para garantizar el aislamiento de datos (Multi-Tenancy):
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Función para verificar si el usuario es administrador
+    function isAdmin() {
+      return request.auth.token.role == 'admin';
+    }
+
+    // Reglas para Pipelines
+    match /pipelines/{pipelineId} {
+      // Un cliente solo puede leer/escribir si el pipeline pertenece a su organización.
+      // Un administrador puede leer todo.
+      allow read, write: if request.auth != null && 
+        (resource.data.organizationId == request.auth.token.organizationId || isAdmin());
+    }
+    
+    // Las mismas reglas aplicarían para pipeline_runs y error_logs
+  }
+}
+
