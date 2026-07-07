@@ -504,23 +504,103 @@ def admin_clients():
     return jsonify(result)
 
 @app.route('/api/admin/users', methods=['GET'])
-def admin_users():
-    """Lista de todos los usuarios del sistema."""
-    result = []
-    for uid, u in db.users.items():
-        org = db.organizations.get(u.get("organizationId"), {})
-        result.append({
-            "id": uid,
-            "name": u["displayName"],
-            "email": u["email"],
-            "role": u["role"],
-            "org_name": org.get("name", "—"),
-            "org_plan": org.get("plan", "—"),
-            "last_login": u["lastLogin"],
-            "created_at": u["createdAt"],
-            "status": "active"
-        })
-    return jsonify(result)
+@require_role('super_admin')
+def admin_users_get():
+    """Lista de todos los usuarios del sistema (lee desde Firestore si está disponible)."""
+    try:
+        # Leer desde Firestore real
+        docs = firestore_db.collection('users').stream()
+        result = []
+        for doc in docs:
+            u = doc.to_dict()
+            org_id = u.get('organizationId')
+            result.append({
+                "id":         doc.id,
+                "name":       u.get('displayName', '—'),
+                "email":      u.get('email', '—'),
+                "role":       u.get('role', 'viewer'),
+                "org_name":   org_id or '—',
+                "last_login": u.get('lastLogin', '—'),
+                "created_at": u.get('createdAt', '—'),
+                "status":     u.get('status', 'active')
+            })
+        return jsonify(result)
+    except Exception:
+        # Fallback a simulador
+        result = []
+        for uid, u in db.users.items():
+            org = db.organizations.get(u.get("organizationId"), {})
+            result.append({
+                "id": uid, "name": u["displayName"], "email": u["email"],
+                "role": u["role"], "org_name": org.get("name", "—"),
+                "last_login": u["lastLogin"], "created_at": u["createdAt"], "status": "active"
+            })
+        return jsonify(result)
+
+@app.route('/api/admin/users', methods=['POST'])
+@require_role('super_admin')
+def admin_users_create():
+    """
+    Crea un nuevo usuario en Firebase Auth y registra su perfil en Firestore.
+    El rol 'super_admin' NO puede asignarse desde este endpoint.
+    """
+    verify_token()
+    data = request.json or {}
+
+    email        = data.get('email', '').strip()
+    password     = data.get('password', '').strip()
+    display_name = data.get('displayName', email).strip()
+    role         = data.get('role', 'viewer').strip()
+    org_id       = data.get('organizationId') or None
+
+    # Validaciones
+    if not email or not password:
+        return jsonify({"error": "Email y contraseña son requeridos"}), 400
+    if len(password) < 6:
+        return jsonify({"error": "La contraseña debe tener al menos 6 caracteres"}), 400
+
+    # Bloquear asignación de super_admin desde la API
+    ALLOWED_ROLES = ['org_admin', 'operator', 'viewer']
+    if role not in ALLOWED_ROLES:
+        return jsonify({
+            "error": f"Rol '{role}' no permitido. Roles válidos: {ALLOWED_ROLES}"
+        }), 400
+
+    try:
+        # 1. Crear usuario en Firebase Auth
+        firebase_user = firebase_auth.create_user(
+            email=email,
+            password=password,
+            display_name=display_name
+        )
+        uid = firebase_user.uid
+
+        # 2. Crear documento en Firestore con el perfil del usuario
+        from datetime import datetime, timezone
+        profile = {
+            'email':          email,
+            'displayName':    display_name,
+            'role':           role,
+            'organizationId': org_id,
+            'createdAt':      datetime.now(timezone.utc).isoformat(),
+            'lastLogin':      None,
+            'status':         'active'
+        }
+        firestore_db.collection('users').document(uid).set(profile)
+
+        return jsonify({
+            "success": True,
+            "uid":     uid,
+            "email":   email,
+            "role":    role,
+            "message": f"Usuario {email} creado exitosamente"
+        }), 201
+
+    except firebase_auth.EmailAlreadyExistsError:
+        return jsonify({"error": f"El email '{email}' ya está registrado"}), 409
+    except Exception as e:
+        return jsonify({"error": f"Error al crear usuario: {str(e)}"}), 500
+
 
 @app.route('/api/admin/global-metrics', methods=['GET'])
 def admin_global_metrics():

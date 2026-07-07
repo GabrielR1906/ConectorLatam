@@ -17,6 +17,7 @@ import ApiDocs from './pages/client/ApiDocs';
 import ApiHealth from './pages/admin/ApiHealth';
 import Alerts from './pages/admin/Alerts';
 import Metrics from './pages/admin/Metrics';
+import Users from './pages/admin/Users';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="apis" element={<ApiHealth />} />
             <Route path="alerts" element={<Alerts />} />
             <Route path="metrics" element={<Metrics />} />
+            <Route path="users" element={<Users />} />
           </Route>
         </Routes>
       </Router>

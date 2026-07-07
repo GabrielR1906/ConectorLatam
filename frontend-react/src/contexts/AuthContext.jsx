@@ -32,6 +32,12 @@ export function AuthProvider({ children }) {
     return userProfile && roles.includes(userProfile.role);
   }
 
+  // Devuelve el JWT del usuario actual para enviarlo al backend
+  async function getToken() {
+    if (!currentUser) return null;
+    return currentUser.getIdToken();
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setCurrentUser(firebaseUser);
@@ -72,6 +78,7 @@ export function AuthProvider({ children }) {
     currentUser,
     userProfile,
     hasRole,
+    getToken,
     login,
     logout
   };
