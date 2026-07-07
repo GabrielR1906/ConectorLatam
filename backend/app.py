@@ -96,26 +96,46 @@ firebase_admin.initialize_app(cred)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def verify_token():
-    """Middleware para extraer y verificar el JWT de Firebase desde el header."""
-    # En producción con Firebase:
-    #   decoded = firebase_auth.verify_id_token(request.headers.get('Authorization').split(' ')[1])
-    #   user_id = decoded['uid']
-    #   user    = db.users.get(user_id)  # Lee el perfil desde Firestore
-    #   g.user  = user
-    #
-    # Para la SIMULACIóN:
-    # Cambia el ID aquí para probar distintos roles:
-    #   "platform_admin_001" → super_admin (panel de plataforma ConectorLatam)
-    #   "user_001"           → org_admin  (panel de cliente - Corporación Demo)
-    #   "user_002"           → operator   (panel de cliente - operador)
-    #   "user_004"           → viewer     (panel de cliente - solo lectura)
-    SIMULATED_USER_ID = "platform_admin_001"  # <-- cambiar aquí para probar
+    """
+    Verifica el JWT de Firebase y carga el perfil real del usuario.
+    Busca al usuario por su email en la base de datos.
+    """
+    auth_header = request.headers.get('Authorization', '')
 
-    current_user = db.get_user(SIMULATED_USER_ID)
-    g.user = current_user
-    # super_admin no pertenece a ninguna org; devolvemos None para que los
-    # endpoints de cliente rechacen su acceso con 403 si no tienen super_admin.
-    return current_user.get("organizationId")
+    if not auth_header.startswith('Bearer '):
+        g.user = None
+        return None
+
+    token = auth_header.split('Bearer ')[1]
+
+    try:
+        # Verificar token JWT real con Firebase Admin SDK
+        decoded = firebase_auth.verify_id_token(token)
+        firebase_email = decoded.get('email', '').lower()
+
+        # Buscar al usuario en la DB por email
+        user_found = None
+        for user_data in db.users.values():
+            if user_data.get('email', '').lower() == firebase_email:
+                user_found = user_data
+                break
+
+        if user_found:
+            g.user = user_found
+        else:
+            # Autenticado en Firebase pero sin perfil en nuestra DB → viewer
+            g.user = {
+                'email': firebase_email,
+                'displayName': decoded.get('name', firebase_email),
+                'role': 'viewer',
+                'organizationId': None
+            }
+
+    except Exception as e:
+        g.user = None
+        return None
+
+    return g.user.get('organizationId')
 
 
 def require_role(*allowed_roles):
