@@ -7,7 +7,7 @@ import {
 import { auth } from '../firebase';
 
 const AuthContext = createContext();
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://conectorlatam-backend.onrender.com/api';
 
 export function useAuth() {
   return useContext(AuthContext);
