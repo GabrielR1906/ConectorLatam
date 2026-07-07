@@ -63,7 +63,7 @@ scheduler.start()
 # ═══════════════════════════════════════════════════════════════════════════════
 
 import firebase_admin
-from firebase_admin import credentials, auth as firebase_auth
+from firebase_admin import credentials, auth as firebase_auth, firestore as fb_firestore
 
 # Configurar Firebase Admin
 # En Render.com los Secret Files se guardan en /etc/secrets/<filename>
@@ -74,6 +74,9 @@ _CREDS_PATH   = _RENDER_CREDS if os.path.exists(_RENDER_CREDS) else _LOCAL_CREDS
 
 cred = credentials.Certificate(_CREDS_PATH)
 firebase_admin.initialize_app(cred)
+
+# Cliente de Firestore — lee datos reales de la BD en la nube
+firestore_db = fb_firestore.client()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  Autenticación y Control de Acceso por Roles (RBAC)
@@ -97,8 +100,10 @@ firebase_admin.initialize_app(cred)
 
 def verify_token():
     """
-    Verifica el JWT de Firebase y carga el perfil real del usuario.
-    Busca al usuario por su email en la base de datos.
+    Verifica el JWT de Firebase y carga el perfil real del usuario desde Firestore.
+    - Decodifica el token para obtener el UID del usuario
+    - Busca el documento users/{uid} en Firestore
+    - Si no existe el documento, cae a db.py como fallback
     """
     auth_header = request.headers.get('Authorization', '')
 
@@ -109,29 +114,44 @@ def verify_token():
     token = auth_header.split('Bearer ')[1]
 
     try:
-        # Verificar token JWT real con Firebase Admin SDK
+        # 1. Verificar token JWT con Firebase Admin SDK
         decoded = firebase_auth.verify_id_token(token)
+        uid = decoded.get('uid')
         firebase_email = decoded.get('email', '').lower()
 
-        # Buscar al usuario en la DB por email
-        user_found = None
-        for user_data in db.users.values():
-            if user_data.get('email', '').lower() == firebase_email:
-                user_found = user_data
-                break
+        # 2. Leer perfil desde Firestore (users/{uid})
+        user_doc = firestore_db.collection('users').document(uid).get()
 
-        if user_found:
-            g.user = user_found
-        else:
-            # Autenticado en Firebase pero sin perfil en nuestra DB → viewer
+        if user_doc.exists:
+            # Datos reales desde Firestore
+            profile = user_doc.to_dict()
             g.user = {
-                'email': firebase_email,
-                'displayName': decoded.get('name', firebase_email),
-                'role': 'viewer',
-                'organizationId': None
+                'email':          profile.get('email', firebase_email),
+                'displayName':    profile.get('displayName', decoded.get('name', firebase_email)),
+                'role':           profile.get('role', 'viewer'),
+                'organizationId': profile.get('organizationId'),
             }
+        else:
+            # Fallback: buscar por email en db.py (simulador local)
+            user_found = None
+            for user_data in db.users.values():
+                if user_data.get('email', '').lower() == firebase_email:
+                    user_found = user_data
+                    break
+
+            if user_found:
+                g.user = user_found
+            else:
+                # Usuario sin perfil en ninguna DB → viewer mínimo
+                g.user = {
+                    'email':          firebase_email,
+                    'displayName':    decoded.get('name', firebase_email),
+                    'role':           'viewer',
+                    'organizationId': None
+                }
 
     except Exception as e:
+        print(f"[verify_token] Error: {e}")
         g.user = None
         return None
 
