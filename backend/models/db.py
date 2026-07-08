@@ -7,11 +7,26 @@ def _now_iso(offset_mins=0):
 class FirestoreSimulator:
     def __init__(self):
         # 1. users
+        # ROLES:
+        #   super_admin → Equipo de ConectorLatam (dueños del sistema)
+        #   org_admin   → Administrador de una organización cliente
+        #   operator    → Operador de una organización cliente (ejecuta pipelines)
+        #   viewer      → Solo lectura dentro de una organización cliente
         self.users = {
+            # ── Equipo interno de ConectorLatam ──────────────────────────────────
+            "platform_admin_001": {
+                "email": "admin@conectorlatam.io",
+                "displayName": "Cristobal (ConectorLatam)",
+                "role": "super_admin",
+                "organizationId": None,   # No pertenece a ninguna org cliente
+                "createdAt": _now_iso(50000),
+                "lastLogin": _now_iso(2)
+            },
+            # ── Clientes: org_12345 (Corporación Demo LATAM) ─────────────────────
             "user_001": {
-                "email": "juan@example.com",
+                "email": "juan@corpodemo.com",
                 "displayName": "Juan Espinosa",
-                "role": "admin",
+                "role": "org_admin",      # Admin de SU organización, no del sistema
                 "organizationId": "org_12345",
                 "createdAt": _now_iso(10000),
                 "lastLogin": _now_iso(5)
@@ -24,14 +39,16 @@ class FirestoreSimulator:
                 "createdAt": _now_iso(8000),
                 "lastLogin": _now_iso(120)
             },
+            # ── Clientes: org_67890 (Grupo Industrial Norte) ─────────────────────
             "user_003": {
                 "email": "carlos.mendoza@grupoindustrial.com.mx",
                 "displayName": "Carlos Mendoza",
-                "role": "admin",
+                "role": "org_admin",
                 "organizationId": "org_67890",
                 "createdAt": _now_iso(5000),
                 "lastLogin": _now_iso(45)
             },
+            # ── Clientes: org_11111 (Importaciones del Pacífico) ──────────────────
             "user_004": {
                 "email": "lucia.vargas@importpac.pe",
                 "displayName": "Lucía Vargas",
@@ -40,10 +57,11 @@ class FirestoreSimulator:
                 "createdAt": _now_iso(3000),
                 "lastLogin": _now_iso(2880)
             },
+            # ── Clientes: org_22222 (TaxSolutions Colombia) ───────────────────────
             "user_005": {
                 "email": "roberto.silva@taxsolutions.co",
                 "displayName": "Roberto Silva",
-                "role": "admin",
+                "role": "org_admin",
                 "organizationId": "org_22222",
                 "createdAt": _now_iso(1500),
                 "lastLogin": _now_iso(30)
@@ -350,16 +368,6 @@ class FirestoreSimulator:
                 "timestamp": _now_iso(1440),
                 "acknowledged": True,
                 "affected_clients": []
-            },
-            {
-                "id": "alert_004",
-                "severity": "info",
-                "title": "Pago fallido — Distribuidora Andina",
-                "message": "El cobro de $149 USD para Distribuidora Andina falló por tarjeta rechazada. Cuenta suspendida automáticamente.",
-                "api": None,
-                "timestamp": _now_iso(48),
-                "acknowledged": False,
-                "affected_clients": ["org_33333"]
             }
         ]
 
@@ -376,6 +384,11 @@ class FirestoreSimulator:
             [{**v, "id": k} for k, v in self.pipeline_runs.items() if v["organizationId"] == org_id],
             key=lambda x: x["startedAt"], reverse=True
         )
+
+    def get_alerts(self, org_id=None):
+        if org_id:
+            return [a for a in self.system_alerts if org_id in a.get("affected_clients", [])]
+        return self.system_alerts
 
     def get_run_errors(self, run_id):
         errors = self.error_logs.get(run_id, {})

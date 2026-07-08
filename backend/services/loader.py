@@ -1,4 +1,5 @@
 import time
+import random
 from models.db import db, _now_iso
 import uuid
 
@@ -25,22 +26,33 @@ class LoaderService:
         
         records_to_load = self.extract_data.get("recordsExtracted", 0)
         duplicates = 0
-        if dest_type == "SNOWFLAKE":
-            duplicates = 3
         
-        records_loaded = records_to_load - duplicates
+        # Simular carga a Data Warehouses (HU07, HU08, HU09) y deduplicación (HU11)
+        if dest_type == "SNOWFLAKE":
+            time.sleep(0.8)
+            duplicates = int(records_to_load * 0.05) # 5% duplicados
+        elif dest_type == "AMAZON_REDSHIFT":
+            time.sleep(1.2) # Redshift COPY command simulación
+            duplicates = int(records_to_load * 0.02)
+        elif dest_type == "BIGQUERY":
+            time.sleep(0.6)
+            duplicates = int(records_to_load * 0.03)
+        else:
+            duplicates = 0
+            
+        records_loaded = max(0, records_to_load - duplicates)
         
         print(f"[MS-Loader] Carga completada: {records_loaded} insertados, {duplicates} omitidos por duplicidad.")
         
-        # Generar error simulado si es SNOWFLAKE (SAT) para la demostración de HU19
-        if dest_type == "SNOWFLAKE":
+        # Generar error simulado aleatorio (HU19)
+        if random.random() < 0.15:
             err_id = str(uuid.uuid4())
             if self.run_id not in db.error_logs:
                 db.error_logs[self.run_id] = {}
             db.error_logs[self.run_id][err_id] = {
-                "documentId": "CFDI-SIM-9999",
+                "documentId": f"DOC-SIM-{random.randint(1000, 9999)}",
                 "errorType": "SCHEMA_MISMATCH",
-                "description": "El tipo de dato en el campo 'monto' no coincide con el destino en Snowflake",
+                "description": f"El tipo de dato no coincide con el destino en {dest_type}",
                 "timestamp": _now_iso()
             }
             

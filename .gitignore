@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+
+# Credenciales Firebase — NUNCA subir al repositorio
+backend/firebase-credentials.json
+firebase-credentials.json
+*.json.key
+
+# Node / Frontend
+frontend-react/node_modules/
+frontend-react/dist/
+frontend-react/.env
+frontend-react/.env.local
+
+# Archivos temporales y del sistema
+*.log
+temp.html
+ngrok.exe
+qrcode.dev.png
+*.bat
+
+# IDE
+.vscode/
+.idea/
