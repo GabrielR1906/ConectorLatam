@@ -164,6 +164,36 @@ const Wizard = () => {
                   </select>
                 </label>
               </div>
+              
+              <div className="form-group form-group--full">
+                <label className="form-label">Filtros de Extracción (HU05)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+                  <div>
+                    <span style={{fontSize: '0.85rem', color: '#9ca3af', marginBottom: '5px', display: 'block'}}>Rango de Fechas</span>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <input type="date" className="form-input" placeholder="Desde" />
+                      <input type="date" className="form-input" placeholder="Hasta" />
+                    </div>
+                  </div>
+                  <div>
+                    <span style={{fontSize: '0.85rem', color: '#9ca3af', marginBottom: '5px', display: 'block'}}>Tipo de Comprobante</span>
+                    <select className="form-input" multiple={true} defaultValue={['factura']} style={{height: '42px'}}>
+                      <option value="factura">Factura</option>
+                      <option value="nota_credito">Nota de Crédito</option>
+                      <option value="retencion">Retención</option>
+                    </select>
+                  </div>
+                  <div>
+                    <span style={{fontSize: '0.85rem', color: '#9ca3af', marginBottom: '5px', display: 'block'}}>Estado</span>
+                    <select className="form-input">
+                      <option value="all">Todos</option>
+                      <option value="authorized">Autorizados</option>
+                      <option value="cancelled">Anulados</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
             </div>
             <div className="wizard-nav">
               <button className="btn btn-ghost" onClick={prevStep}>← Atrás</button>
