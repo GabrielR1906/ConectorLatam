@@ -5,7 +5,27 @@ import { useAuth } from '../contexts/AuthContext';
 const ClientLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, userProfile, currentUser } = useAuth();
+
+  // Nombre real: primero del perfil del backend, luego de Firebase, luego fallback
+  const displayName = userProfile?.displayName || currentUser?.displayName || currentUser?.email || 'Usuario';
+  const userRole = userProfile?.role || 'org_admin';
+
+  // Rol en español para mostrar en la UI
+  const roleLabel = {
+    org_admin: 'Administrador',
+    operator: 'Operador',
+    viewer: 'Solo Lectura',
+    super_admin: 'Super Admin'
+  }[userRole] || 'Usuario';
+
+  // Calcular iniciales del avatar
+  const getInitials = (name) => {
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+  const avatarInitials = getInitials(displayName);
 
   const handleLogout = async () => {
     try {
@@ -103,10 +123,10 @@ const ClientLayout = () => {
             <span>Plan Growth · 14 días trial</span>
           </div>
           <div className="sidebar-user">
-            <div className="user-avatar">CM</div>
+            <div className="user-avatar">{avatarInitials}</div>
             <div className="user-info">
-              <span className="user-name">Carlos Mendoza</span>
-              <span className="user-role">Lead Data Engineer</span>
+              <span className="user-name">{displayName}</span>
+              <span className="user-role">{roleLabel}</span>
             </div>
             <div className="status-dot"></div>
           </div>

@@ -5,7 +5,16 @@ import { useAuth } from '../contexts/AuthContext';
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, userProfile, currentUser } = useAuth();
+
+  const displayName = userProfile?.displayName || currentUser?.displayName || currentUser?.email || 'Administrador';
+
+  const getInitials = (name) => {
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+  const avatarInitials = getInitials(displayName);
 
   const handleLogout = async () => {
     try {
@@ -101,9 +110,9 @@ const AdminLayout = () => {
 
         <div className="sidebar-footer">
           <div className="sidebar-user">
-            <div className="user-avatar user-avatar--admin">JE</div>
+            <div className="user-avatar user-avatar--admin">{avatarInitials}</div>
             <div className="user-info">
-              <span className="user-name">Juan Espinosa</span>
+              <span className="user-name">{displayName}</span>
               <span className="user-role" style={{color: '#f97316'}}>Super Admin</span>
             </div>
             <div className="status-dot"></div>
