@@ -31,6 +31,16 @@ const Wizard = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const getIdentifierLabel = () => {
+    switch (formData.origin) {
+      case 'SRI_ECUADOR': return 'RUC';
+      case 'SAT_MEXICO': return 'RFC';
+      case 'SUNAT_PERU': return 'RUC';
+      case 'DIAN_COLOMBIA': return 'NIT';
+      default: return 'Identificador Fiscal';
+    }
+  };
+
   const handleCreatePipeline = async () => {
     if (!formData.destination) return alert('Seleccione un destino');
     try {
@@ -139,25 +149,25 @@ const Wizard = () => {
         {step === 2 && (
           <div className="wizard-card">
             <div className="wizard-card-header">
-              <h2>Credenciales y Configuración (HU20)</h2>
-              <p>Las credenciales se almacenan con cifrado <strong style={{color: '#8b5cf6'}}>AES-256 (Cryptography)</strong> y se protegen mediante Firebase / Secret Manager.</p>
+              <h2>Credenciales y Configuración</h2>
+              <p>Las credenciales se almacenan con cifrado <strong style={{color: '#8b5cf6'}}>AES-256</strong>.</p>
             </div>
             <div className="form-grid">
               <div className="form-group">
-                <label className="form-label">Identificador (RUC/RFC/NIT)</label>
+                <label className="form-label">{getIdentifierLabel()}</label>
                 <input type="text" className="form-input" value={formData.identifier} onChange={(e) => updateForm('identifier', e.target.value)} placeholder="Ej: 1792..." />
               </div>
               <div className="form-group">
-                <label className="form-label">Contraseña Clave Sol / Firma</label>
+                <label className="form-label">Contraseña / Clave / Firma</label>
                 <input type="password" className="form-input" value={formData.password} onChange={(e) => updateForm('password', e.target.value)} placeholder="••••••••••••" />
               </div>
               <div className="form-group form-group--full" style={{display: 'flex', gap: '20px'}}>
                 <label className="form-label" style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
                   <input type="checkbox" checked={formData.incrementalMode} onChange={(e) => updateForm('incrementalMode', e.target.checked)} />
-                  Modo Incremental (HU06)
+                  Modo Incremental
                 </label>
                 <label className="form-label" style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                  Programación (HU12):
+                  Programación:
                   <select className="form-input" value={formData.cronExpression} onChange={(e) => updateForm('cronExpression', e.target.value)} style={{width: 'auto'}}>
                     <option value="0 * * * *">Cada Hora</option>
                     <option value="0 0 * * *">Diario (Medianoche)</option>
@@ -166,7 +176,7 @@ const Wizard = () => {
               </div>
               
               <div className="form-group form-group--full">
-                <label className="form-label">Filtros de Extracción (HU05)</label>
+                <label className="form-label">Filtros de Extracción</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                   <div>
                     <span style={{fontSize: '0.85rem', color: '#9ca3af', marginBottom: '5px', display: 'block'}}>Rango de Fechas</span>
@@ -177,11 +187,17 @@ const Wizard = () => {
                   </div>
                   <div>
                     <span style={{fontSize: '0.85rem', color: '#9ca3af', marginBottom: '5px', display: 'block'}}>Tipo de Comprobante</span>
-                    <select className="form-input" multiple={true} defaultValue={['factura']} style={{height: '42px'}}>
-                      <option value="factura">Factura</option>
-                      <option value="nota_credito">Nota de Crédito</option>
-                      <option value="retencion">Retención</option>
-                    </select>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                      <label style={{display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem'}}>
+                        <input type="checkbox" defaultChecked /> Factura
+                      </label>
+                      <label style={{display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem'}}>
+                        <input type="checkbox" defaultChecked /> Nota de Crédito
+                      </label>
+                      <label style={{display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem'}}>
+                        <input type="checkbox" /> Retención
+                      </label>
+                    </div>
                   </div>
                   <div>
                     <span style={{fontSize: '0.85rem', color: '#9ca3af', marginBottom: '5px', display: 'block'}}>Estado</span>

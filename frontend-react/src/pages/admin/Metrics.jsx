@@ -41,7 +41,7 @@ const Metrics = () => {
           <div className="kpi-icon kpi-icon--purple">🏢</div>
           <div className="kpi-content">
             <span className="kpi-label">Organizaciones Activas</span>
-            <span className="kpi-value">{metrics.active_organizations} / {metrics.total_organizations}</span>
+            <span className="kpi-value">{metrics.active_organizations}</span>
           </div>
         </div>
         <div className="kpi-card">
@@ -55,14 +55,14 @@ const Metrics = () => {
           <div className="kpi-icon kpi-icon--green">🗄️</div>
           <div className="kpi-content">
             <span className="kpi-label">Registros Procesados</span>
-            <span className="kpi-value">{metrics.total_extracted.toLocaleString()}</span>
+            <span className="kpi-value">{(metrics.total_records_processed || 0).toLocaleString()}</span>
           </div>
         </div>
         <div className="kpi-card">
           <div className="kpi-icon kpi-icon--amber">⭐</div>
           <div className="kpi-content">
             <span className="kpi-label">Tasa Éxito Global</span>
-            <span className="kpi-value">{metrics.success_rate}%</span>
+            <span className="kpi-value">{metrics.global_success_rate}%</span>
           </div>
         </div>
       </div>
